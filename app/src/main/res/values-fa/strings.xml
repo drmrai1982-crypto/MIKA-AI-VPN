@@ -1,10 +1,10 @@
 <resources>
-    <string name="app_name">MSN-GUARD</string>
-    <string name="vpn_channel_name">MSN-GUARD</string>
-    <string name="vpn_notification">MSN-GUARD در حال اجراست</string>
+    <string name="app_name">MIKA AI VPN</string>
+    <string name="vpn_channel_name">MIKA AI VPN</string>
+    <string name="vpn_notification">MIKA AI VPN در حال اجراست</string>
 
     <!-- Quick Tile strings -->
-    <string name="vpn_tile_label">MSN-GUARD</string>
+    <string name="vpn_tile_label">MIKA AI VPN</string>
     <string name="vpn_connected">متصل شد</string>
     <string name="vpn_disconnected">متصل نیست</string>
     <string name="vpn_connecting">در حال اتصال…</string>
