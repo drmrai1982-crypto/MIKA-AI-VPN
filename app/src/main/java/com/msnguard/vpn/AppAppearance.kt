@@ -139,24 +139,24 @@ object AppAppearance {
         ink = 0xFFEAF6F3.toInt(),
         muted = 0xFF9DB0B5.toInt(),
         divider = 0xFF1C2429.toInt(),
-        primary = 0xFF4FE3C1.toInt(),
+        primary = 0xFF00FF66.toInt(),
         primaryContainer = 0xFF04070B.toInt(),
         selectedSurface = 0xFF04070B.toInt(),
-        connected = 0xFF5CE68F.toInt(),
+        connected = 0xFF00FF66.toInt(),
         connectedContainer = 0xFF11331F.toInt(),
         faint = 0xFF5F7276.toInt(),
-        mint = 0xFF4FE3C1.toInt(),
-        violet = 0xFF9B8CFF.toInt(),
+        mint = 0xFF00FF66.toInt(),
+        violet = 0xFF00E5FF.toInt(),
         amber = 0xFFFFC46B.toInt(),
-        danger = 0xFFFF6B7F.toInt(),
+        danger = 0xFFFF1744.toInt(),
         // On the dark canvas the vivid accents already read as text (10-11:1),
         // so no separate text ramp — except the failure headline, which the app
         // has always drawn in a softer red than the dial's danger ring.
-        error = 0xFFFFB4AB.toInt(),
+        error = 0xFFFF1744.toInt(),
         // Neon frame accents: bright enough to read as a lit outline on the
         // near-black canvas, dimmer than a text colour would need to be.
-        neonBlue = 0xFF00C8FF.toInt(),
-        neonViolet = 0xFFB388FF.toInt(),
+        neonBlue = 0xFF00E5FF.toInt(),
+        neonViolet = 0xFFFF1744.toInt(),
         lighting = Sculpt.DARK_LIGHTING,
     )
 
