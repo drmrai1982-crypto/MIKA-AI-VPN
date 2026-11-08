@@ -4,6 +4,20 @@ on:
   push:
     branches: [ master, shard-rewrite ]
   workflow_dispatch:
+    inputs:
+      publish_release:
+        description: "Publish the successful build as a GitHub Release for in-app updates"
+        required: true
+        type: boolean
+        default: false
+      release_tag:
+        description: "Release tag (for example v3.2.1)"
+        required: false
+        type: string
+        default: "v3.2.1"
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -114,3 +128,12 @@ jobs:
           name: arm64-v8a-apk
           path: app/build/outputs/apk/release/app-arm64-v8a-release.apk
           if-no-files-found: error
+      - name: Publish GitHub Release for MIKA AI VPN updates
+        if: ${{ inputs.publish_release }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.release_tag }}
+          name: MIKA AI VPN ${{ inputs.release_tag }}
+          generate_release_notes: true
+          make_latest: true
+          files: app/build/outputs/apk/release/*.apk
