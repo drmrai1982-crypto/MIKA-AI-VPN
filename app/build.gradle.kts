@@ -26,7 +26,7 @@ android {
     ndkVersion = "26.3.11579264"
 
     defaultConfig {
-        applicationId = "com.msnguard.vpn"
+        applicationId = "com.mikaai.vpn"
         minSdk = 26
         targetSdk = 36
         versionCode = 450
