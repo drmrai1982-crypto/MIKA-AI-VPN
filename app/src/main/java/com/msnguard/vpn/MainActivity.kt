@@ -908,43 +908,72 @@ class MainActivity : Activity() {
 
     private fun showOpeningOverlay() {
         val overlay = FrameLayout(this).apply {
-            setBackgroundColor(CANVAS)
+            setBackgroundColor(Color.rgb(6, 9, 14))
             isClickable = true
+            alpha = 1f
         }
-        val logo = ImageView(this).apply {
-            setImageResource(R.drawable.msnguard_splash_logo)
-            contentDescription = getString(R.string.app_name)
-            scaleType = ScaleType.FIT_CENTER
-            alpha = 0f
-            scaleX = 0.82f
-            scaleY = 0.82f
+        val content = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+            setPadding(dp(24), dp(24), dp(24), dp(24))
         }
-        overlay.addView(logo, FrameLayout.LayoutParams(dp(198), dp(276), Gravity.CENTER))
+        val wordmark = TextView(this).apply {
+            text = "MIKA AI VPN"
+            textSize = 30f
+            typeface = Typeface.create("sans-serif-black", Typeface.NORMAL)
+            letterSpacing = 0.08f
+            gravity = Gravity.CENTER
+            setTextColor(Color.rgb(0, 255, 102))
+        }
+        val company = TextView(this).apply {
+            text = "MIKA AI Technologies"
+            textSize = 15f
+            gravity = Gravity.CENTER
+            letterSpacing = 0.04f
+            setTextColor(Color.rgb(0, 229, 255))
+            setPadding(0, dp(18), 0, dp(8))
+        }
+        val director = TextView(this).apply {
+            text = ".Dr.Mr.AI"
+            textSize = 14f
+            gravity = Gravity.CENTER
+            setTextColor(Color.rgb(255, 23, 68))
+        }
+        content.addView(wordmark, LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+        ))
+        content.addView(company, LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+        ))
+        content.addView(director, LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+        ))
+        content.alpha = 0f
+        content.scaleX = 0.92f
+        content.scaleY = 0.92f
+        overlay.addView(content, FrameLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.CENTER
+        ))
         pageHost.addView(overlay)
 
-        logo.animate()
+        // 500 ms entrance + 2,200 ms hold + 300 ms exit = 3,000 ms total.
+        content.animate()
             .alpha(1f)
             .scaleX(1f)
             .scaleY(1f)
             .setDuration(500)
             .setInterpolator(PathInterpolator(0.2f, 0f, 0f, 1f))
             .withEndAction {
-                logo.animate()
-                    .scaleX(1.05f)
-                    .scaleY(1.05f)
-                    .setDuration(700)
-                    .setInterpolator(PathInterpolator(0.4f, 0f, 0.2f, 1f))
-                    .withEndAction {
-                        overlay.animate()
-                            .alpha(0f)
-                            .setDuration(300)
-                            .withEndAction {
-                                pageHost.removeView(overlay)
-                                orbitDial.requestFocus()
-                            }
-                            .start()
-                    }
-                    .start()
+                overlay.postDelayed({
+                    overlay.animate()
+                        .alpha(0f)
+                        .setDuration(300)
+                        .withEndAction {
+                            pageHost.removeView(overlay)
+                            orbitDial.requestFocus()
+                        }
+                        .start()
+                }, 2200L)
             }
             .start()
     }
