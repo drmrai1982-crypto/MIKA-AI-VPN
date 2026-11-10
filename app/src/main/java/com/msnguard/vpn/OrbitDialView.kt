@@ -2,6 +2,8 @@ package com.msnguard.vpn
 
 import android.animation.ValueAnimator
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.LinearGradient
@@ -102,6 +104,14 @@ class OrbitDialView(
 
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val textPaint = TextPaint(Paint.ANTI_ALIAS_FLAG)
+    private val logoBitmap: Bitmap? = runCatching {
+        val options = BitmapFactory.Options().apply {
+            inSampleSize = 2
+            inPreferredConfig = Bitmap.Config.ARGB_8888
+        }
+        BitmapFactory.decodeResource(resources, R.drawable.mika_ai_vpn_icon, options)
+    }.getOrNull()
+    private val logoPaint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG)
     // The dial is hand-drawn glass, so it needs the same lighting model as the
     // card backgrounds: white speculars over a dark canvas, dark speculars over
     // a light one. Read once — the palette cannot change without recreate().
@@ -136,8 +146,8 @@ class OrbitDialView(
     }
 
     private fun accentFor(state: State): Int = when (state) {
-        State.DISCONNECTED -> palette.muted
-        State.CONNECTING -> palette.amber
+        State.DISCONNECTED -> palette.danger
+        State.CONNECTING -> palette.neonBlue
         State.CONNECTED -> palette.connected
         State.DEGRADED -> palette.amber
         State.FAILED -> palette.danger
@@ -530,115 +540,99 @@ class OrbitDialView(
         active: Boolean,
         geo: Float,
     ) {
-        if (active && timerText.isNotEmpty()) {
-            textPaint.typeface = monoTypeface
-            textPaint.textAlign = Paint.Align.CENTER
-            textPaint.textSize = 26f * density * geo
-            textPaint.color = Sculpt.onGlass(accent)
-            // The glow is the dark theme's; on a light dial a 14dp accent halo
-            // behind dark digits just muddies them, so it is dropped there.
-            if (light.elevationDp == 0f) {
-                textPaint.setShadowLayer(dp(14) * geo, 0f, 0f, Sculpt.withAlpha(accent, 0.5f))
+        // The MIKA AI VPN mark remains the same in every connection state.
+        // Only the surrounding glow follows the live VPN state.
+        val logoY = cy - dp(if (active) 24f else 7f) * geo
+        drawMikaLogo(canvas, cx, logoY, dp(54f) * geo, accent, geo)
+
+        if (active) {
+            if (timerText.isNotEmpty()) {
+                textPaint.typeface = monoTypeface
+                textPaint.textAlign = Paint.Align.CENTER
+                textPaint.textSize = 20f * density * geo
+                textPaint.color = Sculpt.onGlass(accent)
+                if (light.elevationDp == 0f) {
+                    textPaint.setShadowLayer(dp(12) * geo, 0f, 0f, Sculpt.withAlpha(accent, 0.45f))
+                }
+                canvas.drawText(timerText, cx, cy + dp(39) * geo, textPaint)
+                textPaint.clearShadowLayer()
+
+                textPaint.typeface = labelTypeface
+                textPaint.textSize = 8.5f * density * geo
+                textPaint.letterSpacing = if (AppLanguage.current() != "en") 0f else 0.19f
+                textPaint.color = Sculpt.withAlpha(palette.faint, 0.95f)
+                canvas.drawText(Strings.t("SESSION"), cx, cy + dp(55) * geo, textPaint)
+                textPaint.letterSpacing = spacing(0f)
             }
-            canvas.drawText(timerText, cx, cy + 7f * density * geo, textPaint)
-            textPaint.clearShadowLayer()
-
-            textPaint.typeface = labelTypeface
-            textPaint.textSize = 9f * density * geo
-            textPaint.letterSpacing = if (AppLanguage.current() != "en") 0f else 0.19f
-            textPaint.color = Sculpt.withAlpha(palette.faint, 0.95f)
-            canvas.drawText(Strings.t("SESSION"), cx, cy + 27f * density * geo, textPaint)
-            textPaint.letterSpacing = spacing(0f)
             return
         }
-
-        // CONNECTING gets its own glyph, never the shield.
-        //
-        // The shield carries a checkmark, and a checkmark means "done" in every
-        // UI a user has ever seen — so during a 20-second Psiphon handshake the
-        // dial was actively lying, and people reported being connected while the
-        // tunnel was still negotiating. Nothing that resolves to a tick may be
-        // drawn before State.CONNECTED.
-        //
-        // What replaces it: three arcs of an expanding radar sweep, drawn in
-        // amber, each one further out and fainter, cycling on the same loop
-        // fraction that already drives the arc and the pulse. It reads as
-        // "reaching out, no answer yet" and cannot be mistaken for a success
-        // mark. Free to animate — the loop animator is already running in this
-        // state, so this adds no timer and no wakeups.
-        if (state == State.CONNECTING) {
-            drawSeekingGlyph(canvas, cx, cy, geo)
-
-            textPaint.typeface = labelTypeface
-            textPaint.textAlign = Paint.Align.CENTER
-            textPaint.textSize = 10.5f * density * geo
-            textPaint.letterSpacing = if (AppLanguage.current() != "en") 0f else 0.19f
-            textPaint.color = palette.amberText
-            // The percentage stays, appended to the caption instead of occupying
-            // the middle of the dial: it is real information when the transport
-            // reports it, and joining it to the word keeps a number from ever
-            // sitting alone where the tick used to be. Transports that cannot
-            // measure progress print no figure (see progressPercent).
-            val caption = if (progressPercent >= 0) Strings.tf("CONNECTING %s%%", progressPercent) else Strings.t("CONNECTING")
-            canvas.drawText(caption, cx, cy + dp(26) * geo, textPaint)
-            textPaint.letterSpacing = spacing(0f)
-            return
-        }
-
-        // Shield glyph + call to action.
-        val shieldTop = cy - dp(30) * geo
-        val shieldW = dp(30) * geo
-        val shieldH = dp(34) * geo
-        paint.style = Paint.Style.STROKE
-        paint.strokeWidth = 2f * density
-        paint.strokeJoin = Paint.Join.ROUND
-        paint.color = when (state) {
-            State.FAILED -> palette.danger
-            else -> Sculpt.withAlpha(palette.muted, 0.9f)
-        }
-        val path = Path().apply {
-            moveTo(cx, shieldTop)
-            lineTo(cx + shieldW / 2f, shieldTop + shieldH * 0.13f)
-            lineTo(cx + shieldW / 2f, shieldTop + shieldH * 0.52f)
-            cubicTo(
-                cx + shieldW / 2f, shieldTop + shieldH * 0.82f,
-                cx + shieldW * 0.22f, shieldTop + shieldH * 0.97f,
-                cx, shieldTop + shieldH,
-            )
-            cubicTo(
-                cx - shieldW * 0.22f, shieldTop + shieldH * 0.97f,
-                cx - shieldW / 2f, shieldTop + shieldH * 0.82f,
-                cx - shieldW / 2f, shieldTop + shieldH * 0.52f,
-            )
-            lineTo(cx - shieldW / 2f, shieldTop + shieldH * 0.13f)
-            close()
-        }
-        canvas.drawPath(path, paint)
-        // The tick inside the shield, as in the mock.
-        paint.strokeWidth = 1.7f * density
-        canvas.drawPath(Path().apply {
-            moveTo(cx - shieldW * 0.15f, shieldTop + shieldH * 0.50f)
-            lineTo(cx - shieldW * 0.02f, shieldTop + shieldH * 0.63f)
-            lineTo(cx + shieldW * 0.20f, shieldTop + shieldH * 0.36f)
-        }, paint)
-        paint.strokeJoin = Paint.Join.MITER
 
         textPaint.typeface = labelTypeface
         textPaint.textAlign = Paint.Align.CENTER
-        textPaint.textSize = 10.5f * density * geo
+        textPaint.textSize = 10f * density * geo
         textPaint.letterSpacing = if (AppLanguage.current() != "en") 0f else 0.19f
-        // CONNECTING never reaches here — it returned above with its own glyph —
-        // so only the resting and failed captions are left.
         textPaint.color = when (state) {
+            State.CONNECTING -> accent
             State.FAILED -> palette.dangerText
-            else -> Sculpt.withAlpha(palette.faint, 0.95f)
+            else -> Sculpt.withAlpha(accent, 0.95f)
         }
-        val cta = when (state) {
+
+        val caption = when (state) {
+            State.CONNECTING -> if (progressPercent >= 0) {
+                Strings.tf("CONNECTING %s%%", progressPercent)
+            } else {
+                Strings.t("CONNECTING")
+            }
             State.FAILED -> Strings.t("RETRY")
             else -> Strings.t("TAP TO CONNECT")
         }
-        canvas.drawText(cta, cx, cy + dp(26) * geo, textPaint)
+        canvas.drawText(caption, cx, cy + dp(43) * geo, textPaint)
         textPaint.letterSpacing = spacing(0f)
+    }
+
+    private fun drawMikaLogo(
+        canvas: Canvas,
+        cx: Float,
+        cy: Float,
+        size: Float,
+        accent: Int,
+        geo: Float,
+    ) {
+        val radius = size * 0.60f
+
+        paint.style = Paint.Style.FILL
+        paint.shader = null
+        paint.color = Sculpt.withAlpha(accent, 0.16f)
+        paint.setShadowLayer(dp(18) * geo, 0f, 0f, Sculpt.withAlpha(accent, 0.72f))
+        canvas.drawCircle(cx, cy, radius, paint)
+        paint.clearShadowLayer()
+
+        paint.style = Paint.Style.STROKE
+        paint.strokeWidth = 1.35f * density * geo
+        paint.color = Sculpt.withAlpha(accent, 0.78f)
+        canvas.drawCircle(cx, cy, radius, paint)
+        paint.style = Paint.Style.FILL
+
+        val destination = RectF(
+            cx - size / 2f,
+            cy - size / 2f,
+            cx + size / 2f,
+            cy + size / 2f,
+        )
+        val bitmap = logoBitmap
+        if (bitmap != null) {
+            logoPaint.alpha = 255
+            canvas.drawBitmap(bitmap, null, destination, logoPaint)
+        } else {
+            // A readable fallback if the optional image resource is unavailable.
+            textPaint.textAlign = Paint.Align.CENTER
+            textPaint.typeface = labelTypeface
+            textPaint.color = Color.WHITE
+            textPaint.textSize = 11f * density * geo
+            canvas.drawText("MIKA", cx, cy - dp(1) * geo, textPaint)
+            textPaint.textSize = 7f * density * geo
+            canvas.drawText("AI VPN", cx, cy + dp(10) * geo, textPaint)
+        }
     }
 
     /**
@@ -659,7 +653,7 @@ class OrbitDialView(
      * arc also gives the sweep a direction.
      */
     private fun drawSeekingGlyph(canvas: Canvas, cx: Float, cy: Float, geo: Float) {
-        val amber = palette.amber
+        val amber = accentFor(State.CONNECTING)
         // The core dot: breathes on the same pulse as the halo, so the glyph has
         // a fixed anchor and the eye has something to hold while the arcs move.
         paint.style = Paint.Style.FILL
