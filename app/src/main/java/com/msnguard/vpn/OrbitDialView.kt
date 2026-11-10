@@ -542,8 +542,8 @@ class OrbitDialView(
     ) {
         // The MIKA AI VPN mark remains the same in every connection state.
         // Only the surrounding glow follows the live VPN state.
-        val logoY = cy - dp(if (active) 24f else 7f) * geo
-        drawMikaLogo(canvas, cx, logoY, dp(54f) * geo, accent, geo)
+        val logoY = cy - dp(if (active) 24 else 7) * geo
+        drawMikaLogo(canvas, cx, logoY, dp(54) * geo, accent, geo)
 
         if (active) {
             if (timerText.isNotEmpty()) {
