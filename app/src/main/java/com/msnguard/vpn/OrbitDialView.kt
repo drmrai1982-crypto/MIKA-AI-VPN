@@ -2,8 +2,7 @@ package com.msnguard.vpn
 
 import android.animation.ValueAnimator
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
+import android.graphics.drawable.Drawable
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.LinearGradient
@@ -104,14 +103,9 @@ class OrbitDialView(
 
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val textPaint = TextPaint(Paint.ANTI_ALIAS_FLAG)
-    private val logoBitmap: Bitmap? = runCatching {
-        val options = BitmapFactory.Options().apply {
-            inSampleSize = 2
-            inPreferredConfig = Bitmap.Config.ARGB_8888
-        }
-        BitmapFactory.decodeResource(resources, R.drawable.mika_ai_vpn_icon, options)
+    private val logoDrawable: Drawable? = runCatching {
+        resources.getDrawable(R.drawable.mika_ai_vpn_icon, null)
     }.getOrNull()
-    private val logoPaint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG)
     // The dial is hand-drawn glass, so it needs the same lighting model as the
     // card backgrounds: white speculars over a dark canvas, dark speculars over
     // a light one. Read once — the palette cannot change without recreate().
@@ -619,10 +613,15 @@ class OrbitDialView(
             cx + size / 2f,
             cy + size / 2f,
         )
-        val bitmap = logoBitmap
-        if (bitmap != null) {
-            logoPaint.alpha = 255
-            canvas.drawBitmap(bitmap, null, destination, logoPaint)
+        val drawable = logoDrawable
+        if (drawable != null) {
+            drawable.setBounds(
+                destination.left.toInt(),
+                destination.top.toInt(),
+                destination.right.toInt(),
+                destination.bottom.toInt(),
+            )
+            drawable.draw(canvas)
         } else {
             // A readable fallback if the optional image resource is unavailable.
             textPaint.textAlign = Paint.Align.CENTER
