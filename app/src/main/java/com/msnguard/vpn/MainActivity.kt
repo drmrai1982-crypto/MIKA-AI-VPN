@@ -315,7 +315,6 @@ class MainActivity : Activity() {
     private var splitTunnelDraftPackages: MutableSet<String>? = null
     private var trafficMonitorPage: View? = null
     private var dnsPage: View? = null
-    private var donatePage: View? = null
     private var mtuPage: View? = null
     private var warpSettingPage: View? = null
     private var mtuScanning: Boolean = false
@@ -6282,66 +6281,6 @@ class MainActivity : Activity() {
         dnsPage?.let { animatePageClose(it) { dnsPage = null } }
     }
 
-    /**
-     * The Donate screen (v2.0.9).
-     *
-     * Four crypto addresses, one card per network, each with a Copy button that
-     * puts only that address on the clipboard. Kept deliberately plain: a donation
-     * page is a destination, not a pitch — the user already chose to be here, so
-     * the screen says thank you once, in one sentence, and gets out of the way.
-     *
-     * The chain labels are rendered through [Strings.t] for layout reasons (the
-     * section header component measures and wraps them) but every language maps
-     * them back to the same Latin string. They are network identifiers a wallet
-     * matches on, and a translated name would be one the user cannot paste.
-     */
-    private fun openDonateScreen() {
-        donatePage?.let(pageHost::removeView)
-        val page = FrameLayout(this).apply {
-            setBackgroundColor(CANVAS)
-            isClickable = true
-        }
-        val scroll = ScrollView(this).apply { isVerticalScrollBarEnabled = false }
-        val content = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(dp(24), dp(16), dp(24), dp(24))
-        }
-        content.addView(LinearLayout(this).apply {
-            gravity = Gravity.CENTER_VERTICAL
-            addView(createHeaderBackButton { closeDonateScreen() }, LinearLayout.LayoutParams(dp(48), dp(48)))
-            addView(label(Strings.t("Donate"), 22f, INK, TypefaceStyle.MEDIUM).apply { setPadding(dp(4), 0, 0, 0) })
-        })
-        content.addView(label(
-            Strings.t("Thank you for supporting the development and upkeep of MIKA AI VPN. If this app helped you get through a filtered network, a small tip keeps the servers running and the updates coming."),
-            14f, MUTED,
-        ), LinearLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT,
-        ).apply { leftMargin = dp(4); topMargin = dp(6); bottomMargin = dp(20) })
-
-        DONATE_ADDRESSES.forEach { (chain, address) ->
-            content.addView(donateCard(chain, address), LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT,
-            ).apply { bottomMargin = dp(12) })
-        }
-
-        scroll.addView(content)
-        page.addView(scroll, FrameLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT,
-        ))
-        page.setOnApplyWindowInsetsListener { _, insets ->
-            content.setPadding(dp(24), insets.systemWindowInsetTop + dp(16), dp(24), insets.systemWindowInsetBottom + dp(24))
-            insets
-        }
-        donatePage = page
-        pageHost.addView(page)
-        page.requestApplyInsets()
-        animatePageOpen(page)
-    }
-
-    private fun closeDonateScreen() {
-        donatePage?.let { animatePageClose(it) { donatePage = null } }
-    }
-
     // ─────────────────────────────────────────────────────────────────
     // MTU screen — one row per transport, same pattern as every other
     // settings page in this activity (FrameLayout pageHost > ScrollView).
@@ -7169,54 +7108,6 @@ class MainActivity : Activity() {
     }
 
     /**
-     * One network: a section label naming the chain, the address in a monospace
-     * block, and a Copy button.
-     *
-     * Monospace is not decorative. A proportional font makes a 40-character
-     * address wrap in a way that looks breakable, and users hand-type or
-     * screenshot-transcribe these far more often than they should — identical
-     * glyph widths make a copied fragment readable.
-     */
-    private fun donateCard(chain: String, address: String): LinearLayout =
-        LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            setPadding(dp(18), dp(15), dp(18), dp(15))
-            background = Sculpt.sculptedBackground(
-                resources.displayMetrics.density, SURFACE_VARIANT, 18, stroke = DIVIDER)
-        }.apply {
-            addView(OrbitSectionHeader(this@MainActivity, palette, Strings.t(chain)))
-            addView(label(address, 13.5f, INK).apply {
-                typeface = android.graphics.Typeface.MONOSPACE
-                // The address is the one thing on the page the user must be able to
-                // read in full. Breaking it makes a fragment, and a fragment is not
-                // an address.
-                setSingleLine(true)
-                setHorizontallyScrolling(true)
-                setPadding(dp(0), dp(8), dp(0), dp(12))
-            }, LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT,
-            ))
-            addView(createSettingsButton(
-                Strings.t("Copy"),
-                icon = R.drawable.ic_copy,
-                textColorOverride = primary,
-            ) {
-                copyAddressToClipboard(chain, address)
-            }, LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, dp(46),
-            ))
-        }
-
-    private fun copyAddressToClipboard(chain: String, address: String) {
-        val clipboard = getSystemService(ClipboardManager::class.java) ?: return
-        clipboard.setPrimaryClip(ClipData.newPlainText(Strings.t(chain), address))
-        // Android 13+ shows its own chip, so this is a duplicate there — but a
-        // silent copy on an address the user then pastes into a real wallet is
-        // exactly the place being told twice beats not being told.
-        toastShort(Strings.t("Address copied"))
-    }
-
-    /**
      * One labelled field + Test button for one DNS transport.
      *
      * The Test button probes the entries that are currently in the field, NOT the
@@ -7950,7 +7841,6 @@ class MainActivity : Activity() {
             splitTunnelPage != null -> closeSplitTunnelScreen()
             trafficMonitorPage != null -> closeTrafficMonitorScreen()
             dnsPage != null -> closeDnsScreen()
-            donatePage != null -> closeDonateScreen()
             tunnelControlsPage != null -> closeTunnelControlsScreen()
             warpSettingPage != null -> closeWarpSettingScreen()
             foxySettingPage != null -> closeFoxySettingScreen()
@@ -10116,20 +10006,6 @@ class MainActivity : Activity() {
          */
         const val VERIFY_MIN_RX_BYTES = 4_096L
 
-        /**
-         * Donation addresses, v2.0.9.
-         *
-         * Order is display order: Ethereum first because it is the one most users
-         * hold, then Bitcoin, then the two cheap-transfer chains. The label is a
-         * Strings key — every language maps the chain names back to the same Latin
-         * string, because they are network identifiers a wallet matches on.
-         */
-        val DONATE_ADDRESSES = listOf(
-            "Ethereum Chain" to "0xA9e165Db72a6f1B3261dfcFb7cc9ADD725Ea2f25",
-            "Bitcoin" to "bc1q4ntxszj643n0ujj3uuncljk8uyprug4swprxlg",
-            "Tron Chain" to "TN58EHrD9AvtVEx4FSka5kitwpgXdXbri9",
-            "Solana Chain" to "3wPEfTm1bCbrU9aqie7xMgAXJK1qXGktRn2yjtjb6LPt",
-        )
         /**
          * Breathing room kept between the console's bottom edge and the viewport
          * when [fitConsoleToViewport] sizes the dial. Without it the action bar
