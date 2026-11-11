@@ -1,12 +1,10 @@
 <div dir="rtl" align="center">
 
-<img src="docs/logo.png" width="150" alt="MSN-GUARD">
-
-# برنامهٔ MSN-GUARD
+# برنامهٔ MIKA AI VPN
 
 **تونل سراسری اندروید برای شبکه‌های دشوار و محدود**
 
-[![Build](https://img.shields.io/github/actions/workflow/status/mbm110/MSN-GUARD/build.yml?branch=master&style=for-the-badge&label=build)](https://github.com/mbm110/MSN-GUARD/actions)
+[![Build](https://img.shields.io/github/actions/workflow/status/drmrai1982-crypto/MSN-GUARD/build.yml?branch=master&style=for-the-badge&label=build)](https://github.com/mbm110/MSN-GUARD/actions)
 [![Android](https://img.shields.io/badge/Android-8.0%2B-3A4FB0?style=for-the-badge&logo=android&logoColor=white)](https://github.com/mbm110/MSN-GUARD)
 [![License](https://img.shields.io/badge/license-AGPL--3.0-6c5ce7?style=for-the-badge)](LICENSE)
 [![Transports](https://img.shields.io/badge/transports-7-1f6f4a?style=for-the-badge)](#روشهای-اتصال)
@@ -19,11 +17,7 @@
 
 ## نگاهی کوتاه
 
-<p align="center">
-  <img src="docs/msn-guard-dashboard.jpg" width="380" alt="داشبورد MSN-GUARD با تونل WireGuard متصل، آمار زندهٔ ترافیک، روش‌های اتصال و وضعیت Psiphon روی WARP">
-</p>
-
-برنامهٔ MSN-GUARD برای کسانی ساخته شده که در شبکه‌های دشوار، به یک مسیر اتصال ثابت بسنده نمی‌کنند. برنامه مالک `VpnService` و رابط TUN اندروید است؛ بنابراین ترافیک همهٔ برنامه‌ها می‌تواند بدون تنظیم پراکسی جداگانه از مسیر انتخاب‌شده عبور کند.
+برنامهٔ MIKA AI VPN برای کسانی ساخته شده که در شبکه‌های دشوار، به یک مسیر اتصال ثابت بسنده نمی‌کنند. برنامه مالک `VpnService` و رابط TUN اندروید است؛ بنابراین ترافیک همهٔ برنامه‌ها می‌تواند بدون تنظیم پراکسی جداگانه از مسیر انتخاب‌شده عبور کند.
 
 رابط برنامه وضعیت‌های مهم را جلوی چشم نگه می‌دارد: مدت نشست، تأخیر، مصرف، سرعت، موقعیت خروجی، روش فعال و سلامت مسیرهای زنجیره‌ای. جزئیات حساس اتصال که باعث دوام مسیر روی یک شبکهٔ مشخص می‌شوند عمداً در این صفحه منتشر نشده‌اند؛ اینجا معماری و قابلیت‌ها را توضیح می‌دهیم، نه دستورالعمل عبور از فیلتر.
 
@@ -82,7 +76,7 @@ VpnService و TUN اندروید
 
 ## کشف، MTU و اعتبارسنجی
 
-اتصال در MSN-GUARD یک فرایند اندازه‌گیری‌شده است. برنامه بسته به روش انتخابی می‌تواند اندپوینت‌ها را پیدا کند، چند خانوادهٔ آدرس را بررسی کند، بودجهٔ اسکن محدود داشته باشد، MTU مناسب را انتخاب کند و عبور واقعی داده را بسنجد. پاسخ‌دادن یک گیت‌وی به دست‌دهی به‌تنهایی کافی نیست.
+اتصال در MIKA AI VPN یک فرایند اندازه‌گیری‌شده است. برنامه بسته به روش انتخابی می‌تواند اندپوینت‌ها را پیدا کند، چند خانوادهٔ آدرس را بررسی کند، بودجهٔ اسکن محدود داشته باشد، MTU مناسب را انتخاب کند و عبور واقعی داده را بسنجد. پاسخ‌دادن یک گیت‌وی به دست‌دهی به‌تنهایی کافی نیست.
 
 منطق fallback خودکار هم همین اصل را دنبال می‌کند: اگر listener زنده باشد اما مسیر داده خالی بماند، آن مسیر تنزل پیدا می‌کند. انتخاب‌های سالم برای شروع اتصال بعدی cache می‌شوند و هنگام تغییر شبکه امکان بررسی تازه وجود دارد.
 
@@ -110,30 +104,12 @@ VpnService و TUN اندروید
 
 لطفاً اعتبارنامه، Identity، کلید خصوصی یا ترافیک کاربر را در Issue عمومی قرار ندهید. برای گزارش امنیتی از فرایند خصوصی نوشته‌شده در [SECURITY.md](SECURITY.md) استفاده کنید.
 
-## حمایت از پروژه
-
-اگر MSN-GUARD برایتان مفید است، کمک مالی به ادامهٔ توسعه و آزمایش کمک می‌کند. پیش از ارسال، شبکهٔ درست را انتخاب کنید.
-
-```text
-Ethereum Chain
-0xA9e165Db72a6f1B3261dfcFb7cc9ADD725Ea2f25
-
-Bitcoin
-bc1q4ntxszj643n0ujj3uuncljk8uyprug4swprxlg
-
-Tron Chain
-TN58EHrD9AvtVEx4FSka5kitwpgXdXbri9
-
-Solana Chain
-3wPEfTm1bCbrU9aqie7xMgAXJK1qXGktRn2yjtjb6LPt
-```
-
 ## مجوز
 
-برنامهٔ MSN-GUARD با [GNU AGPL-3.0](LICENSE) منتشر می‌شود. اجزای همراه، از جمله quiche، BadVPN، lwIP، Psiphon، Tor و lyrebird، طبق مجوزهای خودشان توزیع می‌شوند.
+برنامهٔ MIKA AI VPN با [GNU AGPL-3.0](LICENSE) منتشر می‌شود. اجزای همراه، از جمله quiche، BadVPN، lwIP، Psiphon، Tor و lyrebird، طبق مجوزهای خودشان توزیع می‌شوند.
 
 <div align="center">
 
-**توسعه و نگهداری با [mbm110](https://github.com/mbm110) انجام می‌شود**
+**توسعه و نگهداری توسط MIKA AI Technologies**
 
 </div>
