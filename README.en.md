@@ -4,8 +4,8 @@
 
 **A device-wide Android tunnel for difficult networks**
 
-[![Build](https://img.shields.io/github/actions/workflow/status/drmrai1982-crypto/MIKA AI VPN/build.yml?branch=master&style=for-the-badge&label=build)](https://github.com/mbm110/MSN-GUARD/actions)
-[![Android](https://img.shields.io/badge/Android-8.0%2B-3A4FB0?style=for-the-badge&logo=android&logoColor=white)](https://github.com/mbm110/MSN-GUARD)
+[![Build](https://img.shields.io/github/actions/workflow/status/drmrai1982-crypto/MIKA AI VPN/build.yml?branch=master&style=for-the-badge&label=build)](https://github.com/drmrai1982-crypto/MSN-GUARD/actions)
+[![Android](https://img.shields.io/badge/Android-8.0%2B-3A4FB0?style=for-the-badge&logo=android&logoColor=white)](https://github.com/drmrai1982-crypto/MSN-GUARD)
 [![License](https://img.shields.io/badge/license-AGPL--3.0-6c5ce7?style=for-the-badge)](LICENSE)
 [![Transports](https://img.shields.io/badge/transports-7-1f6f4a?style=for-the-badge)](#connection-methods)
 
@@ -17,7 +17,7 @@
 
 ## A quick look
 
-MSN-GUARD is built for people who need a full-device connection on networks where a single tunnel is not enough. The app owns Android's `VpnService` and TUN interface, so traffic from every application can follow the selected route without per-app proxy settings.
+MIKA AI VPN is built for people who need a full-device connection on networks where a single tunnel is not enough. The app owns Android's `VpnService` and TUN interface, so traffic from every application can follow the selected route without per-app proxy settings.
 
 The interface keeps the important state visible: session time, latency, traffic, speed, exit location, active method, and the health of a chained route. The details that make a route survive a particular network remain intentionally quiet; this page describes the system without publishing its sensitive operating recipe.
 
@@ -76,7 +76,7 @@ The Kotlin layer owns Android lifecycle, permissions, TUN setup, settings, profi
 
 ## Discovery, MTU, and verification
 
-MSN-GUARD treats connection as a measured process. Depending on the selected method, it can discover candidate endpoints, test more than one address family, apply a bounded probe budget, choose an MTU, and verify that useful bytes cross the tunnel. A server or gateway that merely accepts a handshake is not enough.
+MIKA AI VPN treats connection as a measured process. Depending on the selected method, it can discover candidate endpoints, test more than one address family, apply a bounded probe budget, choose an MTU, and verify that useful bytes cross the tunnel. A server or gateway that merely accepts a handshake is not enough.
 
 The same principle is used by the automatic fallback logic: a route can be demoted when its listener is alive but its data path is empty. Cached choices help the next connection start quickly, while fresh checks remain available when the network changes.
 
@@ -88,7 +88,7 @@ Named profiles make it possible to keep different combinations of transport, sca
 
 ## Install
 
-Download signed APKs from [Releases](https://github.com/mbm110/MSN-GUARD/releases). GitHub Actions also provides build artifacts for development testing.
+Download signed APKs from [Releases](https://github.com/drmrai1982-crypto/MSN-GUARD/releases). GitHub Actions also provides build artifacts for development testing.
 
 Android 8.0 / API 26 or newer is required. On first use, Android will ask for VPN permission. The project builds separate ARM variants as well as the universal and emulator packages used for testing.
 
@@ -104,27 +104,9 @@ The connection parameters, endpoint rankings, timing choices, and other network-
 
 Do not put credentials, identity material, private keys, or user traffic in issues. For security reports, use the private process described in [SECURITY.md](SECURITY.md).
 
-## Support the project
-
-If MSN-GUARD is useful to you, donations help cover development and testing. Always select the correct network before sending funds.
-
-```text
-Ethereum Chain
-0xA9e165Db72a6f1B3261dfcFb7cc9ADD725Ea2f25
-
-Bitcoin
-bc1q4ntxszj643n0ujj3uuncljk8uyprug4swprxlg
-
-Tron Chain
-TN58EHrD9AvtVEx4FSka5kitwpgXdXbri9
-
-Solana Chain
-3wPEfTm1bCbrU9aqie7xMgAXJK1qXGktRn2yjtjb6LPt
-```
-
 ## License
 
-MSN-GUARD is released under [GNU AGPL-3.0](LICENSE). Bundled components are distributed under their respective licenses, including the licenses documented for quiche, BadVPN, lwIP, Psiphon, Tor, and lyrebird.
+MIKA AI VPN is released under [GNU AGPL-3.0](LICENSE). Bundled components are distributed under their respective licenses, including the licenses documented for quiche, BadVPN, lwIP, Psiphon, Tor, and lyrebird.
 
 <div align="center">
 
