@@ -3952,30 +3952,24 @@ class MainActivity : Activity() {
                 ViewGroup.LayoutParams.WRAP_CONTENT,
             ).apply { topMargin = dp(10) })
             body.addView(navRow(Strings.t("Source on GitHub"), iconRes = R.drawable.ic_github) {
-                openLink("https://github.com/mbm110/MSN-GUARD")
+                openLink("https://github.com/drmrai1982-crypto/MSN-GUARD")
             }, LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
             ).apply { topMargin = dp(8) })
-            body.addView(navRow(Strings.t("Telegram Channel"), iconRes = R.drawable.ic_telegram) {
-                openLink("https://t.me/MSN_GUARD")
-            }, LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-            ).apply { topMargin = dp(8) })
-            // v2.0.9: the last row on the page. It opens its own screen rather than
-            // a sheet: four addresses each with their own Copy button need room a
-            // bottom sheet cannot give without scrolling away the thanks line.
-            body.addView(navRow(Strings.t("Donate"), iconRes = R.drawable.ic_heart) {
-                openDonateScreen()
-            }, LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-            ).apply { topMargin = dp(8) })
-            body.addView(label("MSN-GUARD ${appVersion()}", 11.5f, Sculpt.withAlpha(MUTED, 0.7f)).apply {
+            body.addView(label("MIKA AI Technologies", 12f, MUTED).apply {
+                gravity = Gravity.CENTER_HORIZONTAL
+                letterSpacing = spacing(0.04f)
+                setPadding(0, dp(18), 0, dp(4))
+            })
+            body.addView(label(Strings.t("Director: Mahmoud Razzazzadeh"), 11.5f, MUTED).apply {
+                gravity = Gravity.CENTER_HORIZONTAL
+                setPadding(0, dp(2), 0, 0)
+            })
+            body.addView(label("MIKA AI VPN ${appVersion()}", 11.5f, Sculpt.withAlpha(MUTED, 0.7f)).apply {
                 gravity = Gravity.CENTER_HORIZONTAL
                 letterSpacing = spacing(0.06f)
-                setPadding(0, dp(22), 0, 0)
+                setPadding(0, dp(14), 0, 0)
             })
         }, LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
