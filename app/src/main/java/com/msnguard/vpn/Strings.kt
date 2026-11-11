@@ -338,7 +338,7 @@ object Strings {
         "MSN-GUARD" to Triple("MIKA AI VPN", "MIKA AI VPN", "MIKA AI VPN"),
         "MSN-GUARD %s has been released. You are on %s." to Triple("MIKA AI VPN %s has been released. You are on %s.", "نسخه %s MIKA AI VPN منتشر شده است. نسخه فعلی شما %s است.", "MIKA AI VPN %s 已发布，当前版本为 %s。"),
         "MSN-GUARD %s is installed" to Triple("MIKA AI VPN %s is installed", "نسخه %s MIKA AI VPN نصب شده است", "已安装 MIKA AI VPN %s"),
-        "MSN-GUARD \\\${appVersion()}" to Triple("MIKA AI VPN \\\${appVersion()}", "MSN-GUARD \\\${appVersion()}", "MSN-GUARD \\\${appVersion()}"),
+        "MSN-GUARD \\\${appVersion()}" to Triple("MIKA AI VPN \\\${appVersion()}", "MIKA AI VPN \\\${appVersion()}", "MIKA AI VPN \\\${appVersion()}"),
         "MSN-GUARD is running" to Triple("MIKA AI VPN is running", "MIKA AI VPN در حال اجراست", "MIKA AI VPN 正在运行"),
         "MSN-GUARD log" to Triple("MIKA AI VPN log", "گزارش MIKA AI VPN", "MIKA AI VPN 日志"),
         "Log copied (%s KB)" to Triple("Log copied (%s KB)", "گزارش کپی شد (%s کیلوبایت)", "日志已复制（%s KB）"),
