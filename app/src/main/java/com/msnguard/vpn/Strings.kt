@@ -161,6 +161,7 @@ object Strings {
         "1 selected app" to Triple("1 selected app", "۱ برنامه انتخاب‌شده", "1 个应用已选"),
         "1 server in the bundled list" to Triple("1 server in the bundled list", "۱ سرور در لیست داخلی", "1 个内置节点"),
         "ABOUT" to Triple("ABOUT", "درباره برنامه", "关于"),
+        "Director: Mahmoud Razzazzadeh" to Triple("Director: Mahmoud Razzazzadeh", "مدیر: محمود رزاززاده", "董事：Mahmoud Razzazzadeh"),
         "ANTI-DPI" to Triple("ANTI-DPI", "ضد DPI", "抗 DPI"),
         "APPEARANCE" to Triple("APPEARANCE", "ظاهر برنامه", "外观"),
         "ARMED" to Triple("ARMED", "آماده‌به‌کار", "已就绪"),
