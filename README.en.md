@@ -1,12 +1,10 @@
 <div align="center">
 
-<img src="docs/logo.png" width="150" alt="MSN-GUARD">
-
-# MSN-GUARD
+# MIKA AI VPN
 
 **A device-wide Android tunnel for difficult networks**
 
-[![Build](https://img.shields.io/github/actions/workflow/status/mbm110/MSN-GUARD/build.yml?branch=master&style=for-the-badge&label=build)](https://github.com/mbm110/MSN-GUARD/actions)
+[![Build](https://img.shields.io/github/actions/workflow/status/drmrai1982-crypto/MIKA AI VPN/build.yml?branch=master&style=for-the-badge&label=build)](https://github.com/mbm110/MSN-GUARD/actions)
 [![Android](https://img.shields.io/badge/Android-8.0%2B-3A4FB0?style=for-the-badge&logo=android&logoColor=white)](https://github.com/mbm110/MSN-GUARD)
 [![License](https://img.shields.io/badge/license-AGPL--3.0-6c5ce7?style=for-the-badge)](LICENSE)
 [![Transports](https://img.shields.io/badge/transports-7-1f6f4a?style=for-the-badge)](#connection-methods)
@@ -18,10 +16,6 @@
 ---
 
 ## A quick look
-
-<p align="center">
-  <img src="docs/msn-guard-dashboard.jpg" width="380" alt="MSN-GUARD dashboard showing a connected WireGuard session, live traffic statistics, transport choices, and a chained Psiphon over WARP status">
-</p>
 
 MSN-GUARD is built for people who need a full-device connection on networks where a single tunnel is not enough. The app owns Android's `VpnService` and TUN interface, so traffic from every application can follow the selected route without per-app proxy settings.
 
@@ -134,6 +128,6 @@ MSN-GUARD is released under [GNU AGPL-3.0](LICENSE). Bundled components are dist
 
 <div align="center">
 
-**Developed and maintained by [mbm110](https://github.com/mbm110)**
+**Developed and maintained by MIKA AI Technologies**
 
 </div>
