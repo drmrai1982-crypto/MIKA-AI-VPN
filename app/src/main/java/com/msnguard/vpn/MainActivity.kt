@@ -698,7 +698,7 @@ class MainActivity : Activity() {
         // now a thin signal trace that idles flat and grey, and ripples in the
         // connected accent once traffic is flowing. One 48-point path repainted at
         // 20fps only while connected — no bitmaps, no extra APK weight.
-        footerWave = OrbitFooterWave(this, palette, Strings.t("SECURED BY MSN-GUARD"))
+        footerWave = OrbitFooterWave(this, palette, Strings.t("SECURED BY MIKA AI VPN"))
         statusLed = View(this).apply {
             background = Sculpt.sculptedBackground(
                 resources.displayMetrics.density,
@@ -1458,7 +1458,7 @@ class MainActivity : Activity() {
             rightMargin = dp(8)
         }
         addView(statusLed, statusLed.layoutParams)
-        addView(label(Strings.t("MSN-GUARD"), 13f, MUTED, TypefaceStyle.MEDIUM).apply {
+        addView(label(Strings.t("MIKA AI VPN"), 13f, MUTED, TypefaceStyle.MEDIUM).apply {
             letterSpacing = spacing(0.14f)
         })
         addView(label(appVersion(), 11f, MUTED).apply {
@@ -2502,7 +2502,7 @@ class MainActivity : Activity() {
             .toList()
         val app = fromDisk?.takeIf { it.isNotBlank() } ?: ConnectionLog.snapshot().joinToString("\n")
         return buildString {
-            append("MSN-GUARD ")
+            append("MIKA AI VPN ")
             append(appVersionOrNull() ?: "?")
             append(" · ")
             append(selectedProtocol.label)
@@ -2542,7 +2542,7 @@ class MainActivity : Activity() {
             runOnUiThread {
                 if (isFinishing || isDestroyed) return@runOnUiThread
                 val clipboard = getSystemService(ClipboardManager::class.java)
-                clipboard?.setPrimaryClip(ClipData.newPlainText(Strings.t("MSN-GUARD log"), text))
+                clipboard?.setPrimaryClip(ClipData.newPlainText(Strings.t("MIKA AI VPN log"), text))
                 // Always confirm, on every Android version. Android 13+ shows its
                 // own clipboard chip, so this is briefly a duplicate there — but a
                 // silent COPY on a long log is indistinguishable from a broken
@@ -2567,7 +2567,7 @@ class MainActivity : Activity() {
         Thread({
             val result = runCatching {
                 val dir = File(cacheDir, "logs").apply { mkdirs() }
-                val target = File(dir, "msn-guard-log.txt")
+                val target = File(dir, "mika-ai-vpn-log.txt")
                 target.writeText(plainExport())
                 target
             }
@@ -2581,7 +2581,7 @@ class MainActivity : Activity() {
                         Intent.createChooser(
                             Intent(Intent.ACTION_SEND)
                                 .setType("text/plain")
-                                .putExtra(Intent.EXTRA_SUBJECT, "MSN-GUARD log")
+                                .putExtra(Intent.EXTRA_SUBJECT, "MIKA AI VPN log")
                                 .putExtra(Intent.EXTRA_STREAM, uri)
                                 .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION),
                             Strings.t("Share log"),
@@ -2615,7 +2615,7 @@ class MainActivity : Activity() {
                         Intent.createChooser(
                             Intent(Intent.ACTION_SEND)
                                 .setType("text/plain")
-                                .putExtra(Intent.EXTRA_SUBJECT, "MSN-GUARD Log Key")
+                                .putExtra(Intent.EXTRA_SUBJECT, "MIKA AI VPN Log Key")
                                 .putExtra(Intent.EXTRA_STREAM, uri)
                                 .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION),
                             Strings.t("Log Key"),
@@ -3166,7 +3166,7 @@ class MainActivity : Activity() {
             ViewGroup.LayoutParams.WRAP_CONTENT,
         ).apply { bottomMargin = dp(8) })
 
-        content.addView(label(Strings.t("Choose how MSN-GUARD connects"), 14f, MUTED), LinearLayout.LayoutParams(
+        content.addView(label(Strings.t("Choose how MIKA AI VPN connects"), 14f, MUTED), LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.WRAP_CONTENT,
         ).apply { leftMargin = dp(4); bottomMargin = dp(24) })
@@ -5267,7 +5267,7 @@ class MainActivity : Activity() {
         }
         showChoiceSheet(
             title = Strings.t("Tunnel type"),
-            subtitle = Strings.t("How MSN-GUARD carries your traffic"),
+            subtitle = Strings.t("How MIKA AI VPN carries your traffic"),
             options = listOf(CoreConfig.TUNNEL_MODE_VPN, CoreConfig.TUNNEL_MODE_PROXY),
             selected = CoreConfig.tunnelMode(this),
             label = { if (it == CoreConfig.TUNNEL_MODE_VPN) Strings.t("VPN (whole device)") else Strings.t("SOCKS proxy") },
@@ -6148,7 +6148,7 @@ class MainActivity : Activity() {
             addView(createHeaderBackButton { closeTrafficMonitorScreen() }, LinearLayout.LayoutParams(dp(48), dp(48)))
             addView(label(Strings.t("Traffic monitor"), 22f, INK, TypefaceStyle.MEDIUM).apply { setPadding(dp(4), 0, 0, 0) })
         })
-        content.addView(label(Strings.t("Traffic carried by MSN-GUARD. Per-app attribution is not available from encrypted tunnel counters."), 14f, MUTED), LinearLayout.LayoutParams(
+        content.addView(label(Strings.t("Traffic carried by MIKA AI VPN. Per-app attribution is not available from encrypted tunnel counters."), 14f, MUTED), LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.WRAP_CONTENT,
         ).apply { leftMargin = dp(4); bottomMargin = dp(24) })
@@ -6312,7 +6312,7 @@ class MainActivity : Activity() {
             addView(label(Strings.t("Donate"), 22f, INK, TypefaceStyle.MEDIUM).apply { setPadding(dp(4), 0, 0, 0) })
         })
         content.addView(label(
-            Strings.t("Thank you for supporting the development and upkeep of MSN-GUARD. If this app helped you get through a filtered network, a small tip keeps the servers running and the updates coming."),
+            Strings.t("Thank you for supporting the development and upkeep of MIKA AI VPN. If this app helped you get through a filtered network, a small tip keeps the servers running and the updates coming."),
             14f, MUTED,
         ), LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -7561,7 +7561,7 @@ class MainActivity : Activity() {
             }, LinearLayout.LayoutParams(dp(88), dp(40)).apply { marginEnd = dp(4) })
         }
         content.addView(header)
-        content.addView(label(Strings.t("Choose which apps use MSN-GUARD. Changes apply next connection."), 14f, MUTED), LinearLayout.LayoutParams(
+        content.addView(label(Strings.t("Choose which apps use MIKA AI VPN. Changes apply next connection."), 14f, MUTED), LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.WRAP_CONTENT,
         ).apply { leftMargin = dp(48); topMargin = dp(-8); bottomMargin = dp(20) })
@@ -9846,7 +9846,7 @@ class MainActivity : Activity() {
         val settings = SplitTunnelSettings(this)
         val count = settings.packages().size
         return when (settings.mode()) {
-            SplitTunnelSettings.Mode.ALL -> Strings.t("All apps use MSN-GUARD")
+            SplitTunnelSettings.Mode.ALL -> Strings.t("All apps use MIKA AI VPN")
             SplitTunnelSettings.Mode.INCLUDE ->
                 if (count == 1) Strings.t("Only 1 selected app")
                 else Strings.tf("Only %s selected apps", count)
