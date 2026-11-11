@@ -4,8 +4,8 @@
 
 **تونل سراسری اندروید برای شبکه‌های دشوار و محدود**
 
-[![Build](https://img.shields.io/github/actions/workflow/status/drmrai1982-crypto/MSN-GUARD/build.yml?branch=master&style=for-the-badge&label=build)](https://github.com/mbm110/MSN-GUARD/actions)
-[![Android](https://img.shields.io/badge/Android-8.0%2B-3A4FB0?style=for-the-badge&logo=android&logoColor=white)](https://github.com/mbm110/MSN-GUARD)
+[![Build](https://img.shields.io/github/actions/workflow/status/drmrai1982-crypto/MSN-GUARD/build.yml?branch=master&style=for-the-badge&label=build)](https://github.com/drmrai1982-crypto/MSN-GUARD/actions)
+[![Android](https://img.shields.io/badge/Android-8.0%2B-3A4FB0?style=for-the-badge&logo=android&logoColor=white)](https://github.com/drmrai1982-crypto/MSN-GUARD)
 [![License](https://img.shields.io/badge/license-AGPL--3.0-6c5ce7?style=for-the-badge)](LICENSE)
 [![Transports](https://img.shields.io/badge/transports-7-1f6f4a?style=for-the-badge)](#روشهای-اتصال)
 
@@ -88,7 +88,7 @@ VpnService و TUN اندروید
 
 ## نصب
 
-نسخه‌های امضاشدهٔ APK از [بخش Releases](https://github.com/mbm110/MSN-GUARD/releases) قابل دریافت‌اند. فایل‌های artifact مربوط به GitHub Actions هم برای آزمایش‌های توسعه در دسترس هستند.
+نسخه‌های امضاشدهٔ APK از [بخش Releases](https://github.com/drmrai1982-crypto/MSN-GUARD/releases) قابل دریافت‌اند. فایل‌های artifact مربوط به GitHub Actions هم برای آزمایش‌های توسعه در دسترس هستند.
 
 حداقل نسخهٔ موردنیاز Android 8.0 یا API 26 است. اندروید در اولین استفاده مجوز VPN را درخواست می‌کند. بیلدهای جداگانهٔ ARM، نسخهٔ Universal و نسخهٔ مخصوص شبیه‌ساز برای آزمایش در گردش‌کار CI ساخته می‌شوند.
 
