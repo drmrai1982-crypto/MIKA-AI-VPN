@@ -51,7 +51,7 @@
     <application
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
-        android:label="MSN-GUARD"
+        android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher"
         android:theme="@style/Theme.MsnGuard">
         <activity
