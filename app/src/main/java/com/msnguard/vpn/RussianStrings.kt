@@ -3,6 +3,7 @@ package com.msnguard.vpn
 /** Russian UI strings. Keep keys aligned with Strings.table. */
 internal object RussianStrings {
     private val table = mapOf(
+        "Director: Mahmoud Razzazzadeh" to "Директор: Mahmoud Razzazzadeh",
         "Send Code" to "Отправить код",
         "Sign in with Firefox" to "Войти через Firefox",
         "Anti-Censorship & Performance" to "Защита от цензуры и производительность",
