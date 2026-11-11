@@ -18,6 +18,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "MSN-GUARD"
+rootProject.name = "MIKA AI VPN"
 include(":app")
 
