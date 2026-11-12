@@ -911,14 +911,14 @@ class MainActivity : Activity() {
             isClickable = true
         }
         val logo = ImageView(this).apply {
-            setImageResource(R.drawable.msnguard_splash_logo)
+            setImageResource(R.mipmap.mika_ai_vpn_launcher)
             contentDescription = getString(R.string.app_name)
             scaleType = ScaleType.FIT_CENTER
             alpha = 0f
             scaleX = 0.82f
             scaleY = 0.82f
         }
-        overlay.addView(logo, FrameLayout.LayoutParams(dp(198), dp(276), Gravity.CENTER))
+        overlay.addView(logo, FrameLayout.LayoutParams(dp(220), dp(220), Gravity.CENTER))
         pageHost.addView(overlay)
 
         logo.animate()
