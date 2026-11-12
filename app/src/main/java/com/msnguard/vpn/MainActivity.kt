@@ -3951,7 +3951,7 @@ class MainActivity : Activity() {
                 ViewGroup.LayoutParams.WRAP_CONTENT,
             ).apply { topMargin = dp(10) })
             body.addView(navRow(Strings.t("Source on GitHub"), iconRes = R.drawable.ic_github) {
-                openLink("https://github.com/drmrai1982-crypto/MSN-GUARD")
+                openLink("https://github.com/drmrai1982-crypto/MSN-GUARD/tree/mika-ai-vpn-final")
             }, LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
