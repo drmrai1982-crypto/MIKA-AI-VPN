@@ -171,7 +171,12 @@ class MainActivity : Activity() {
     private var innerEndpointRow: OrbitSettingsRow? = null
     private var gatewayCacheRow: OrbitSettingsRow? = null
     private var dnsRow: OrbitSettingsRow? = null
+    private lateinit var worldMapBackground: WorldMapBackgroundView
     private var visualState = OrbitDialView.State.DISCONNECTED
+        set(value) {
+            field = value
+            if (::worldMapBackground.isInitialized) worldMapBackground.setConnectionState(value)
+        }
     private var receiverRegistered = false
     private var autoPingRunning = false
     /**
@@ -715,6 +720,18 @@ class MainActivity : Activity() {
                 else -> android.view.View.LAYOUT_DIRECTION_LTR
             }
         }
+        // Decorative only: the map sits behind the existing console and never
+        // receives input or participates in tunnel state decisions.
+        worldMapBackground = WorldMapBackgroundView(this).apply {
+            setConnectionState(visualState)
+            alpha = 0.72f
+            isClickable = false
+            isFocusable = false
+        }
+        mainRoot.addView(worldMapBackground, FrameLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT,
+        ))
         val header = createHeader()
         val console = createConnectionConsole()
         // The console can still scroll, but it is meant not to need it: the dial
