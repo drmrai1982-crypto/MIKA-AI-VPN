@@ -333,9 +333,9 @@ class OrbitDialView(
                         paint.color = Sculpt.withAlpha(palette.ink, 0.09f)
                         paint.clearShadowLayer()
                     } else {
-                        // Crests tip into mint, so the wave has a hot centre and
-                        // amber shoulders rather than one flat colour.
-                        val hue = if (w > 0.55f) palette.mint else palette.amber
+                        // The connecting state is blue throughout. Keep the same hue
+                        // across the wave so it cannot be mistaken for weak signal.
+                        val hue = palette.neonBlue
                         paint.color = Sculpt.withAlpha(hue, 0.09f + 0.78f * w)
                         if (w > 0.6f) {
                             paint.setShadowLayer(4f * density * w, 0f, 0f, Sculpt.withAlpha(hue, 0.75f * w))
@@ -382,10 +382,10 @@ class OrbitDialView(
             val sweepShader = SweepGradient(
                 cx, cy,
                 intArrayOf(
-                    Sculpt.withAlpha(palette.amber, 0.55f),
-                    Sculpt.withAlpha(palette.amber, 0f),
-                    Sculpt.withAlpha(palette.amber, 0f),
-                    Sculpt.withAlpha(palette.amber, 0.55f),
+                    Sculpt.withAlpha(palette.neonBlue, 0.72f),
+                    Sculpt.withAlpha(palette.neonBlue, 0f),
+                    Sculpt.withAlpha(palette.neonBlue, 0f),
+                    Sculpt.withAlpha(palette.neonBlue, 0.72f),
                 ),
                 floatArrayOf(0f, 0.35f, 0.65f, 1f),
             )
