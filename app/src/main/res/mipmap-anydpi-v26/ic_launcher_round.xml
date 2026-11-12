@@ -1,4 +1,4 @@
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
     <background android:drawable="@drawable/mika_ai_vpn_icon_bg" />
-    <foreground android:drawable="@drawable/mika_ai_vpn_icon" />
+    <foreground android:drawable="@mipmap/mika_ai_vpn_launcher" />
 </adaptive-icon>
