@@ -75,36 +75,12 @@ $env:CMAKE_GENERATOR = 'Ninja'
 $env:CARGO_TARGET_DIR = $target
 $env:PATH = "$(($cmake | Split-Path).Replace('\', '/'));$env:PATH"
 
-# boring-sys builds BoringSSL before its known Windows second-configure failure.
-Push-Location $crate
-try {
-    $ErrorActionPreference = 'Continue'
-    $oldNativeErrorPreference = $PSNativeCommandUseErrorActionPreference
-    $PSNativeCommandUseErrorActionPreference = $false
-    & cargo ndk -t $Abi --platform $Api build --release --lib
-    $bootstrapExit = $LASTEXITCODE
-    $PSNativeCommandUseErrorActionPreference = $oldNativeErrorPreference
-    $ErrorActionPreference = 'Stop'
-}
-finally {
-    Pop-Location
-}
-
-$bsslOut = Get-ChildItem -LiteralPath (Join-Path $target "$targetTriple/release/build").Replace('\', '/') -Directory -Filter 'boring-sys-*' |
-    ForEach-Object { (Join-Path $_.FullName 'out').Replace('\', '/') } |
-    Where-Object { Test-Path -LiteralPath (Join-Path $_ 'build/libssl.a').Replace('\', '/') } |
-    Select-Object -Last 1
-
-if (-not $bsslOut) {
-    throw "BoringSSL bootstrap failed before static libraries were produced (cargo exit $bootstrapExit)."
-}
+# boring-sys 5.2 builds BoringSSL in one CMake configuration.
+# Match the current Linux build path and bundle libc++ statically.
+$rustTargetSuffix = $targetTriple.Replace('-', '_')
+Set-Item "Env:BORING_BSSL_RUST_CPPLIB_$rustTargetSuffix" "static:-bundle=c++"
 
 $sysroot = (Join-Path $ndk 'toolchains/llvm/prebuilt/windows-x86_64/sysroot').Replace('\', '/')
-$env:BORING_BSSL_PATH = (Join-Path $bsslOut 'build').Replace('\', '/')
-$env:BORING_BSSL_INCLUDE_PATH = (Join-Path $bsslOut 'boringssl/src/include').Replace('\', '/')
-$env:BORING_BSSL_ASSUME_PATCHED = '1'
-$env:CLANG_PATH = (Join-Path $bin 'clang.exe').Replace('\', '/')
-
 $rustEnvSuffix = $targetTriple.ToUpper().Replace('-', '_')
 $rustTargetSuffix = $targetTriple.Replace('-', '_')
 Set-Item "Env:CARGO_TARGET_${rustEnvSuffix}_LINKER" (Join-Path $bin "$clangPrefix$Api-clang.cmd").Replace('\', '/')
@@ -116,7 +92,9 @@ Set-Item "Env:CFLAGS_$rustTargetSuffix" "--target=$clangPrefix$Api"
 Set-Item "Env:CXXFLAGS_$rustTargetSuffix" "--target=$clangPrefix$Api"
 Set-Item "Env:BINDGEN_EXTRA_CLANG_ARGS_$rustTargetSuffix" "--target=$clangPrefix$Api --sysroot=$sysroot -I$sysroot/usr/include/$includeArch"
 
-$env:RUSTFLAGS = "$env:RUSTFLAGS -C link-arg=-Wl,-soname,libaether.so -C link-arg=-Wl,-z,max-page-size=16384 -C link-arg=-Wl,-z,common-page-size=16384".Trim()
+# max-page-size enables 16 KB page compatibility. Do not add common-page-size:
+# it can pad PT_GNU_RELRO beyond the end of its LOAD segment.
+$env:RUSTFLAGS = "$env:RUSTFLAGS -C link-arg=-Wl,-soname,libaether.so -C link-arg=-Wl,-z,max-page-size=16384".Trim()
 
 Push-Location $crate
 try {
