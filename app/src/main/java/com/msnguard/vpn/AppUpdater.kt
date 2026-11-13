@@ -215,8 +215,8 @@ class AppUpdater(private val activity: Activity) {
 
     private companion object {
         const val RELEASE_HOST = "api.github.com"
-        const val RELEASE_URL = "https://$RELEASE_HOST/repos/drmrai1982-crypto/MSN-GUARD/releases/latest"
-        const val RELEASES_PAGE_URL = "https://github.com/drmrai1982-crypto/MSN-GUARD/releases/latest"
+        const val RELEASE_URL = "https://$RELEASE_HOST/repos/drmrai1982-crypto/MIKA-AI-VPN/releases/latest"
+        const val RELEASES_PAGE_URL = "https://github.com/drmrai1982-crypto/MIKA-AI-VPN/releases/latest"
 
         fun isNewer(remote: String, local: String): Boolean {
             val remoteParts = remote.split('.', '-', '+').map { it.toIntOrNull() ?: 0 }
