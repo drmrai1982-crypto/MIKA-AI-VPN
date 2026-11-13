@@ -4,8 +4,8 @@
 
 **A device-wide Android tunnel for difficult networks**
 
-[![Build](https://img.shields.io/github/actions/workflow/status/drmrai1982-crypto/MSN-GUARD/build.yml?branch=mika-ai-vpn-final&style=for-the-badge&label=build)](https://github.com/drmrai1982-crypto/MSN-GUARD/actions)
-[![Android](https://img.shields.io/badge/Android-8.0%2B-3A4FB0?style=for-the-badge&logo=android&logoColor=white)](https://github.com/drmrai1982-crypto/MSN-GUARD)
+[![Build](https://img.shields.io/github/actions/workflow/status/drmrai1982-crypto/MIKA-AI-VPN/build.yml?branch=mika-ai-vpn-final&style=for-the-badge&label=build)](https://github.com/drmrai1982-crypto/MIKA-AI-VPN/actions)
+[![Android](https://img.shields.io/badge/Android-8.0%2B-3A4FB0?style=for-the-badge&logo=android&logoColor=white)](https://github.com/drmrai1982-crypto/MIKA-AI-VPN)
 [![License](https://img.shields.io/badge/license-AGPL--3.0-6c5ce7?style=for-the-badge)](LICENSE)
 [![Transports](https://img.shields.io/badge/transports-7-1f6f4a?style=for-the-badge)](#connection-methods)
 
@@ -88,7 +88,7 @@ Named profiles make it possible to keep different combinations of transport, sca
 
 ## Install
 
-Download signed APKs from [Releases](https://github.com/drmrai1982-crypto/MSN-GUARD/releases). GitHub Actions also provides build artifacts for development testing.
+Download signed APKs from [Releases](https://github.com/drmrai1982-crypto/MIKA-AI-VPN/releases). GitHub Actions also provides build artifacts for development testing.
 
 Android 8.0 / API 26 or newer is required. On first use, Android will ask for VPN permission. The project builds separate ARM variants as well as the universal and emulator packages used for testing.
 
