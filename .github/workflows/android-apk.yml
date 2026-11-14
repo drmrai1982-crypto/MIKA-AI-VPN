@@ -62,9 +62,6 @@ jobs:
             ${{ runner.os }}-cargo-android-arm64-
 
       - name: Build debug APK
-        env:
-          ANDROID_HOME: ${{ env.ANDROID_HOME }}
-          ANDROID_SDK_ROOT: ${{ env.ANDROID_HOME }}
         run: |
           chmod +x gradlew core/build-android.sh
           ./gradlew --no-daemon assembleDebug -PtargetAbi=arm64-v8a
