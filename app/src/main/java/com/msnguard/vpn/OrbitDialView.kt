@@ -71,11 +71,7 @@ class OrbitDialView(
             } else {
                 tickReveal = 0f
             }
-            if (value == State.CONNECTING || value == State.CONNECTED || value == State.DEGRADED) {
-                startLoop()
-            } else {
-                stopLoop()
-            }
+            startLoop()
             invalidate()
         }
 
@@ -193,35 +189,117 @@ class OrbitDialView(
         val cx = width / 2f
         val cy = height / 2f
         val half = minOf(width, height) / 2f
-        // The ring is RING_DP scaled by [sizeScale], and the view was measured
-        // (RING_DP + BLEED_DP) * sizeScale, so the glow always has its full
-        // proportional room.
-        //
-        // The second term is the safety net: if a parent hands this view LESS
-        // than it asked for (a narrow screen, an exact-size spec), the ring
-        // shrinks to the largest value that still leaves the bleed intact rather
-        // than letting the outer layers get shaved. Never remove it — it is the
-        // difference between a smaller dial and a cropped one.
-        val ring = minOf(
-            dp(RING_DP) * sizeScale,
-            half * RING_DP / (RING_DP + BLEED_DP).toFloat(),
-        )
-        // Every inner offset below is authored against RING_DP, so they follow
-        // the ring by this factor instead of staying at a fixed dp and throwing
-        // the proportions off whenever the dial shrinks.
-        val geo = ring / dp(RING_DP)
-        val accent = accentFor(state)
-        val active = state == State.CONNECTED || state == State.DEGRADED
+        val ring = minOf(dp(RING_DP) * sizeScale, half * RING_DP / (RING_DP + BLEED_DP).toFloat())
+        drawRadar(canvas, cx, cy, ring, accentFor(state))
+    }
 
-        if (active) {
-            drawHalo(canvas, cx, cy, ring, accent, geo)
-            drawRipples(canvas, cx, cy, ring, accent)
+    /** Airport-style radar: rotating sweep, range rings, crosshair and moving blips. */
+    private fun drawRadar(canvas: Canvas, cx: Float, cy: Float, radius: Float, accent: Int) {
+        val r = radius * 0.91f
+        paint.shader = null
+        paint.style = Paint.Style.FILL
+        paint.color = Sculpt.withAlpha(palette.surface, 0.94f)
+        canvas.drawCircle(cx, cy, r, paint)
+
+        // Soft state-coloured radar field.
+        paint.shader = RadialGradient(cx, cy, r,
+            intArrayOf(Sculpt.withAlpha(accent, 0.15f), Sculpt.withAlpha(accent, 0.035f), Sculpt.withAlpha(palette.ink, 0.02f)),
+            floatArrayOf(0f, 0.72f, 1f), Shader.TileMode.CLAMP)
+        canvas.drawCircle(cx, cy, r, paint)
+        paint.shader = null
+
+        paint.style = Paint.Style.STROKE
+        paint.strokeWidth = 1f * density
+        paint.color = Sculpt.withAlpha(accent, 0.58f)
+        for (fraction in floatArrayOf(0.25f, 0.5f, 0.75f, 1f)) {
+            canvas.drawCircle(cx, cy, r * fraction, paint)
         }
-        drawRings(canvas, cx, cy, ring, geo)
-        drawTicks(canvas, cx, cy, ring, accent, geo)
-        drawArc(canvas, cx, cy, ring, geo)
-        drawCore(canvas, cx, cy, ring, accent, active)
-        drawContents(canvas, cx, cy, ring, accent, active, geo)
+        paint.color = Sculpt.withAlpha(accent, 0.30f)
+        canvas.drawLine(cx-r, cy, cx+r, cy, paint)
+        canvas.drawLine(cx, cy-r, cx, cy+r, paint)
+        canvas.drawLine(cx-r*0.707f, cy-r*0.707f, cx+r*0.707f, cy+r*0.707f, paint)
+        canvas.drawLine(cx-r*0.707f, cy+r*0.707f, cx+r*0.707f, cy-r*0.707f, paint)
+
+        // Rotating luminous sweep sector, like an airport surveillance radar.
+        val angle = loopFraction * 360f - 90f
+        val sector = Path().apply {
+            moveTo(cx, cy)
+            lineTo(cx + cos(Math.toRadians(angle.toDouble())).toFloat()*r,
+                   cy + sin(Math.toRadians(angle.toDouble())).toFloat()*r)
+            arcTo(RectF(cx-r, cy-r, cx+r, cy+r), angle, 58f, false)
+            close()
+        }
+        paint.style = Paint.Style.FILL
+        paint.shader = SweepGradient(cx, cy,
+            intArrayOf(Sculpt.withAlpha(accent, 0.00f), Sculpt.withAlpha(accent, 0.25f), Sculpt.withAlpha(accent, 0.00f)),
+            floatArrayOf(0f, 0.14f, 0.17f))
+        paint.shader?.setLocalMatrix(Matrix().apply { setRotate(angle, cx, cy) })
+        canvas.drawPath(sector, paint)
+        paint.shader = null
+
+        // Bright leading beam.
+        paint.style = Paint.Style.STROKE
+        paint.strokeWidth = 2.2f * density
+        paint.color = Sculpt.withAlpha(accent, 0.95f)
+        paint.setShadowLayer(7f*density, 0f, 0f, Sculpt.withAlpha(accent, 0.9f))
+        canvas.drawLine(cx, cy, cx + cos(Math.toRadians(angle.toDouble())).toFloat()*r,
+            cy + sin(Math.toRadians(angle.toDouble())).toFloat()*r, paint)
+        paint.clearShadowLayer()
+
+        // Fixed route traces and radar targets; targets pulse as the sweep passes.
+        val nodes = arrayOf(
+            floatArrayOf(-0.48f, -0.30f), floatArrayOf(0.18f, -0.58f),
+            floatArrayOf(0.56f, -0.12f), floatArrayOf(0.34f, 0.46f),
+            floatArrayOf(-0.30f, 0.48f), floatArrayOf(-0.62f, 0.12f),
+        )
+        paint.style = Paint.Style.STROKE
+        paint.strokeWidth = 1.25f * density
+        paint.color = Sculpt.withAlpha(accent, 0.48f)
+        val route = Path()
+        nodes.forEachIndexed { index, p ->
+            val x = cx + p[0] * r
+            val y = cy + p[1] * r
+            if (index == 0) route.moveTo(x, y) else route.lineTo(x, y)
+        }
+        canvas.drawPath(route, paint)
+        nodes.forEachIndexed { index, p ->
+            val x = cx + p[0] * r
+            val y = cy + p[1] * r
+            val phase = (loopFraction + index * 0.17f) % 1f
+            val glow = 0.55f + 0.45f * (1f - kotlin.math.abs(phase - 0.5f) * 2f)
+            paint.style = Paint.Style.FILL
+            paint.color = Sculpt.withAlpha(accent, 0.22f)
+            canvas.drawCircle(x, y, (4f + glow*2f)*density, paint)
+            paint.color = Sculpt.withAlpha(accent, 0.92f)
+            canvas.drawCircle(x, y, (1.8f + glow)*density, paint)
+        }
+
+        // Centre is intentionally empty: no brain, logo, shield or power glyph.
+        paint.style = Paint.Style.STROKE
+        paint.strokeWidth = 1.4f * density
+        paint.color = Sculpt.withAlpha(accent, 0.82f)
+        canvas.drawCircle(cx, cy, 3.2f*density, paint)
+        paint.style = Paint.Style.FILL
+        paint.color = accent
+        canvas.drawCircle(cx, cy, 1.5f*density, paint)
+
+        // Status caption remains readable inside the radar's lower edge.
+        textPaint.textAlign = Paint.Align.CENTER
+        textPaint.typeface = monoTypeface
+        textPaint.textSize = 8.5f * density
+        textPaint.color = if (state == State.FAILED) palette.dangerText else accent
+        val caption = when (state) {
+            State.DISCONNECTED -> "OFFLINE"
+            State.CONNECTING -> if (progressPercent >= 0) "SEARCH ${progressPercent}%" else "SEARCHING"
+            State.CONNECTED -> "CONNECTED"
+            State.DEGRADED -> "WEAK SIGNAL"
+            State.FAILED -> "CONNECTION ERROR"
+        }
+        canvas.drawText(caption, cx, cy + r*0.66f, textPaint)
+        paint.style = Paint.Style.STROKE
+        paint.strokeWidth = 1.2f*density
+        paint.color = Sculpt.withAlpha(accent, 0.9f)
+        canvas.drawCircle(cx, cy, r, paint)
     }
 
     /**
@@ -745,7 +823,7 @@ class OrbitDialView(
     private fun startLoop() {
         if (loopAnimator != null) return
         loopAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
-            duration = if (state == State.CONNECTING) 1_150 else 4_400
+            duration = if (state == State.CONNECTING) 1_150 else 3_200
             repeatCount = ValueAnimator.INFINITE
             interpolator = null
             addUpdateListener {
