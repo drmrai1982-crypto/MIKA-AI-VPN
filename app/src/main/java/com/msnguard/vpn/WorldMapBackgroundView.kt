@@ -128,7 +128,7 @@ class WorldMapBackgroundView(context: Context) : View(context) {
         super.onAttachedToWindow()
         if (animator == null) {
             animator = ValueAnimator.ofFloat(0f, 1f).apply {
-                duration = 5200L
+                duration = 12500L
                 repeatCount = ValueAnimator.INFINITE
                 interpolator = LinearInterpolator()
                 addUpdateListener { phase = it.animatedValue as Float; invalidate() }
@@ -175,7 +175,7 @@ class WorldMapBackgroundView(context: Context) : View(context) {
         paint.strokeCap = Paint.Cap.ROUND
         paint.strokeWidth = 0.65f * density
         for (i in nodes.indices) {
-            val offsets = intArrayOf(4, 9, 17)
+            val offsets = intArrayOf(2, 4, 6, 9, 12, 15, 18, 21)
             offsets.forEachIndexed { linkIndex, offset ->
                 val a = nodes[i]
                 val b = nodes[(i + offset) % nodes.size]
@@ -188,9 +188,9 @@ class WorldMapBackgroundView(context: Context) : View(context) {
                 val cy = minOf(ay, by) - arcLift
                 val route = Path().apply { moveTo(ax, ay); quadTo(cx, cy, bx, by) }
                 paint.color = when (linkIndex) {
-                    0 -> Color.argb(32, 230, 215, 122)
-                    1 -> Color.argb(22, 230, 215, 122)
-                    else -> Color.argb(14, 230, 215, 122)
+                    0 -> Color.argb(24, 230, 215, 122)
+                    1 -> Color.argb(18, 230, 215, 122)
+                    else -> Color.argb(12, 230, 215, 122)
                 }
                 paint.strokeWidth = 0.65f * density
                 canvas.drawPath(route, paint)
