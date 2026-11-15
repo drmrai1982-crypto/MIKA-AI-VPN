@@ -280,11 +280,22 @@ class OrbitDialView(
         val bx = cx + cos(beamRad).toFloat() * r
         val by = cy + sin(beamRad).toFloat() * r
         paint.style = Paint.Style.STROKE
-        paint.strokeWidth = 1.6f * density
-        paint.color = Sculpt.withAlpha(accent, 0.96f)
-        paint.setShadowLayer(6f * density, 0f, 0f, Sculpt.withAlpha(accent, 0.8f))
+        // Three translucent strokes create a reliable neon bloom on devices
+        // where hardware shadow rendering is weak or inconsistent.
+        paint.strokeCap = Paint.Cap.ROUND
+        paint.strokeWidth = 8.0f * density
+        paint.color = Sculpt.withAlpha(accent, 0.075f)
         canvas.drawLine(cx, cy, bx, by, paint)
-        paint.clearShadowLayer()
+        paint.strokeWidth = 4.6f * density
+        paint.color = Sculpt.withAlpha(accent, 0.16f)
+        canvas.drawLine(cx, cy, bx, by, paint)
+        paint.strokeWidth = 2.6f * density
+        paint.color = Sculpt.withAlpha(accent, 0.34f)
+        canvas.drawLine(cx, cy, bx, by, paint)
+        paint.strokeWidth = 1.35f * density
+        paint.color = Sculpt.withAlpha(accent, 1f)
+        canvas.drawLine(cx, cy, bx, by, paint)
+        paint.strokeCap = Paint.Cap.BUTT
 
         // Fixed radar returns. Each target brightens as the sweep passes it,
         // then decays naturally instead of blinking in a repeating sequence.
