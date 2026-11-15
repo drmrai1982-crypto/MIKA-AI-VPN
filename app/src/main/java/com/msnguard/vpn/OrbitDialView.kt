@@ -270,7 +270,7 @@ class OrbitDialView(
                 Sculpt.withAlpha(accent, 0.38f),
                 Sculpt.withAlpha(accent, 0.035f),
             ),
-            floatArrayOf(0f, 0.62f, 0.78f, 0.94f, 1f),
+            floatArrayOf(0f, 0.62f, 0.78f, 0.90f, 0.94f, 1f),
         )
         paint.shader?.setLocalMatrix(Matrix().apply { setRotate(angle - 360f, cx, cy) })
         canvas.drawCircle(cx, cy, r, paint)
