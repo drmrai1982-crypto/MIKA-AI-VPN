@@ -22,7 +22,7 @@ concurrency:
 
 jobs:
   build-arm64:
-    name: Build ARM64 Android APK
+    name: Build signed ARM64 Android APK
     runs-on: ubuntu-24.04
     timeout-minutes: 120
 
@@ -63,15 +63,27 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-android-arm64-
 
-      - name: Build debug APK
+      - name: Restore release signing key
+        env:
+          AETHERY_KEYSTORE_BASE64: ${{ secrets.AETHERY_KEYSTORE_BASE64 }}
+        run: |
+          test -n "$AETHERY_KEYSTORE_BASE64"
+          printf '%s' "$AETHERY_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/mika-ai-vpn-release.jks"
+          test -s "$RUNNER_TEMP/mika-ai-vpn-release.jks"
+
+      - name: Build signed release APK
+        env:
+          AETHERY_KEYSTORE_PASSWORD: ${{ secrets.AETHERY_KEYSTORE_PASSWORD }}
+          AETHERY_KEY_ALIAS: ${{ secrets.AETHERY_KEY_ALIAS }}
+          AETHERY_KEY_PASSWORD: ${{ secrets.AETHERY_KEY_PASSWORD }}
         run: |
           chmod +x gradlew core/build-android.sh
-          ./gradlew --no-daemon assembleDebug -PtargetAbi=arm64-v8a
+          ./gradlew --no-daemon assembleRelease -PtargetAbi=arm64-v8a -PaetheryKeystore="$RUNNER_TEMP/mika-ai-vpn-release.jks"
 
-      - name: Upload APK
+      - name: Upload signed APK
         uses: actions/upload-artifact@v4
         with:
-          name: MIKA-AI-VPN-ARM64-debug
-          path: app/build/outputs/apk/debug/*.apk
+          name: MIKA-AI-VPN-ARM64-release-signed
+          path: app/build/outputs/apk/release/*.apk
           if-no-files-found: error
           retention-days: 14
