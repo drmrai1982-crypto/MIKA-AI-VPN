@@ -8969,8 +8969,9 @@ class MainActivity : Activity() {
 
     /** Pushes the latest traffic sample into the three home-screen tiles. */
     private fun renderHomeMetrics() {
-        val (downValue, downUnit) = scaleBytes(trafficRx)
-        val (upValue, upUnit) = scaleBytes(trafficTx)
+        // Home tiles show live throughput, not cumulative session byte totals.
+        val (downValue, downUnit) = scaleSpeed(trafficSpeedRx)
+        val (upValue, upUnit) = scaleSpeed(trafficSpeedTx)
         tileDown.setValue(downValue, downUnit)
         tileUp.setValue(upValue, upUnit)
         val combined = trafficSpeedRx + trafficSpeedTx
