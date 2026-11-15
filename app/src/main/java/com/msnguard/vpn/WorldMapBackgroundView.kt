@@ -184,11 +184,11 @@ class WorldMapBackgroundView(context: Context) : View(context) {
                 val cy = minOf(ay, by) - arcLift
                 val route = Path().apply { moveTo(ax, ay); quadTo(cx, cy, bx, by) }
                 paint.color = when (linkIndex) {
-                    0 -> Color.argb(65, 0, 210, 235)
-                    1 -> Color.argb(48, 0, 210, 235)
-                    else -> Color.argb(34, 0, 210, 235)
+                    0 -> Color.argb(105, 0, 210, 235)
+                    1 -> Color.argb(78, 0, 210, 235)
+                    else -> Color.argb(58, 0, 210, 235)
                 }
-                paint.strokeWidth = (if (linkIndex == 0) 0.95f else 0.7f) * density
+                paint.strokeWidth = (if (linkIndex == 0) 1.15f else 0.9f) * density
                 canvas.drawPath(route, paint)
 
                 val activeRoute = (i == wave && linkIndex == 0) ||
@@ -196,7 +196,7 @@ class WorldMapBackgroundView(context: Context) : View(context) {
                     (i == (wave + 7) % nodes.size && linkIndex == 4)
                 if (activeRoute) {
                     paint.color = accent
-                    paint.strokeWidth = 1.45f * density
+                    paint.strokeWidth = 1.8f * density
                     canvas.drawPath(route, paint)
                 }
             }
