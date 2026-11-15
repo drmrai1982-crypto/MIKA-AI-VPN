@@ -7127,18 +7127,14 @@ ConnectionLog.record("MTU: $foxyMtu for FOXY")
     }
 
     /**
-     * The app's launcher artwork as a round, full-colour notification badge.
+     * The MIKA AI VPN launcher artwork as a round, full-colour notification badge.
      *
-     * Rendered here rather than handed to the system as
-     * `Icon.createWithResource(R.mipmap.ic_launcher)` because that resource is an
-     * adaptive icon: launchers apply a mask to it, but `setLargeIcon` does not,
-     * so on several OEM shells it lands as an unmasked square with the
-     * background plate showing at the corners. Compositing background+foreground
-     * into a circular bitmap ourselves gives the same round badge on every
-     * device.
+     * Use the dedicated full-colour MIKA artwork, not the retired MSN-GUARD
+     * foreground/background layers. The small status-bar icon remains the
+     * monochrome ic_notification resource.
      *
-     * Cached: this is a 128 px bitmap draw, and rebuilding it on every repost
-     * would be pure waste on a row that is posted for hours.
+     * Cached because the foreground VPN notification is reposted while the
+     * tunnel is running.
      */
     private fun appBadge(): android.graphics.drawable.Icon {
         cachedBadge?.let { return it }
@@ -7147,25 +7143,16 @@ ConnectionLog.record("MTU: $foxyMtu for FOXY")
             size, size, android.graphics.Bitmap.Config.ARGB_8888
         )
         val canvas = android.graphics.Canvas(bitmap)
-
-        // Circular clip first, so both layers are trimmed identically.
         val clip = android.graphics.Path().apply {
             addCircle(size / 2f, size / 2f, size / 2f, android.graphics.Path.Direction.CW)
         }
         canvas.clipPath(clip)
 
-        // Adaptive-icon geometry: the artwork is authored on a 108dp canvas of
-        // which the inner 72dp is the guaranteed-visible area, i.e. the layers
-        // are drawn 1.5x oversized and centred. Reproducing that scale is what
-        // keeps the neon ring from being cropped.
-        val inset = (-size * 0.25f).toInt()
-        val bounds = android.graphics.Rect(inset, inset, size - inset, size - inset)
-        listOf(R.drawable.msnguard_icon_bg, R.drawable.msnguard_icon_fg).forEach { id ->
-            getDrawable(id)?.apply {
-                setBounds(bounds)
-                draw(canvas)
-            }
+        getDrawable(R.mipmap.mika_ai_vpn_launcher)?.apply {
+            setBounds(0, 0, size, size)
+            draw(canvas)
         }
+
         return android.graphics.drawable.Icon.createWithBitmap(bitmap)
             .also { cachedBadge = it }
     }
