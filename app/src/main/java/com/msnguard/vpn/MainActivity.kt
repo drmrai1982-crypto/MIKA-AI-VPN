@@ -70,6 +70,7 @@ class MainActivity : Activity() {
     private lateinit var orbitDial: OrbitDialView
     private lateinit var connectionTitle: TextView
     private lateinit var connectionDetail: TextView
+    private lateinit var sessionDurationText: TextView
     private lateinit var chipLatency: TextView
     private lateinit var chipProtocol: TextView
     private lateinit var tileDown: MetricTile
@@ -203,7 +204,9 @@ class MainActivity : Activity() {
             // every second is work with no observer. The elapsed time is derived
             // from `sessionStartedAt` on the next resume, so nothing drifts.
             if (sessionStartedAt == 0L || !uiForeground) return
-            orbitDial.timerText = formatUptime(android.os.SystemClock.elapsedRealtime() - sessionStartedAt)
+            val elapsed = formatUptime(android.os.SystemClock.elapsedRealtime() - sessionStartedAt)
+            orbitDial.timerText = elapsed
+            if (::sessionDurationText.isInitialized) sessionDurationText.text = elapsed
             sessionHandler.postDelayed(this, 1_000L)
         }
     }
@@ -1650,6 +1653,22 @@ class MainActivity : Activity() {
             leftMargin = -dp(20)
             rightMargin = -dp(20)
         })
+
+        // Digital session clock directly beneath the radar/connect control.
+        sessionDurationText = TextView(this@MainActivity).apply {
+            text = "00:00:00"
+            setTextColor(palette.connected)
+            textSize = 18f
+            typeface = Typeface.create("monospace", Typeface.BOLD)
+            letterSpacing = 0.12f
+            gravity = Gravity.CENTER
+            includeFontPadding = false
+            contentDescription = "VPN connection duration"
+        }
+        addView(sessionDurationText, LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT,
+        ).apply { topMargin = dp(5) })
 
         // v1.8.7: English keeps the v1.8.5 margins exactly. fa/zh get a
         // tighter block (title closer to the dial, detail closer to the title)
@@ -8920,6 +8939,7 @@ class MainActivity : Activity() {
         sessionHandler.removeCallbacks(sessionTicker)
         sessionStartedAt = 0L
         orbitDial.timerText = ""
+        if (::sessionDurationText.isInitialized) sessionDurationText.text = "00:00:00"
     }
 
     private fun formatUptime(elapsedMs: Long): String {
