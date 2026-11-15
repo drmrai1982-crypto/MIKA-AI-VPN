@@ -153,7 +153,10 @@ class WorldMapBackgroundView(context: Context) : View(context) {
         val mapTop = h * .035f
         val mapBottom = h * .485f
         val mapHeight = mapBottom - mapTop
-        val wave = (phase * nodes.size).toInt() % nodes.size
+        // Advance to a fresh batch of seven highlighted nodes every second.
+        val batchStart = ((phase * 12.5f).toInt() * 7) % nodes.size
+        fun isInActiveBatch(index: Int): Boolean =
+            (index - batchStart + nodes.size) % nodes.size < 7
 
         paint.style = Paint.Style.STROKE
         paint.strokeWidth = 0.55f * density
@@ -174,8 +177,8 @@ class WorldMapBackgroundView(context: Context) : View(context) {
         paint.style = Paint.Style.STROKE
         paint.strokeCap = Paint.Cap.ROUND
         paint.strokeWidth = 0.65f * density
+        val offsets = intArrayOf(2, 5, 9, 14)
         for (i in nodes.indices) {
-            val offsets = intArrayOf(2, 4, 6, 9, 12, 15, 18, 21)
             offsets.forEachIndexed { linkIndex, offset ->
                 val a = nodes[i]
                 val b = nodes[(i + offset) % nodes.size]
@@ -184,23 +187,20 @@ class WorldMapBackgroundView(context: Context) : View(context) {
                 val bx = b[0] * w
                 val by = mapTop + b[1] * mapHeight
                 val cx = (ax + bx) / 2f
-                val arcLift = mapHeight * (0.075f + linkIndex * 0.045f)
+                val arcLift = mapHeight * (0.10f + linkIndex * 0.065f)
                 val cy = minOf(ay, by) - arcLift
                 val route = Path().apply { moveTo(ax, ay); quadTo(cx, cy, bx, by) }
-                paint.color = when (linkIndex) {
-                    0 -> Color.argb(24, 230, 215, 122)
-                    1 -> Color.argb(18, 230, 215, 122)
-                    else -> Color.argb(12, 230, 215, 122)
-                }
+                paint.color = Color.argb(13, 230, 215, 122)
                 paint.strokeWidth = 0.65f * density
                 canvas.drawPath(route, paint)
 
-                val activeRoute = (i == wave && linkIndex == 0) ||
-                    (i == (wave + 7) % nodes.size && linkIndex == 1)
-                if (activeRoute) {
+                // Every active node lights all four of its outgoing links.
+                if (isInActiveBatch(i)) {
                     paint.color = accent
-                    paint.strokeWidth = 1.25f * density
+                    paint.alpha = 105
+                    paint.strokeWidth = 1.0f * density
                     canvas.drawPath(route, paint)
+                    paint.alpha = 255
                 }
             }
         }
@@ -208,7 +208,7 @@ class WorldMapBackgroundView(context: Context) : View(context) {
         nodes.forEachIndexed { i, point ->
             val x = point[0] * w
             val y = mapTop + point[1] * mapHeight
-            val active = i == wave || i == (wave + 1) % nodes.size
+            val active = isInActiveBatch(i)
             paint.style = Paint.Style.FILL
             paint.color = if (active) accent else Color.rgb(176, 164, 105)
             paint.alpha = if (active) {
