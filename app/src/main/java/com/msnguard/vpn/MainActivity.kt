@@ -1618,32 +1618,17 @@ class MainActivity : Activity() {
         clipChildren = false
         clipToPadding = false
 
-        // Keep the original dial measured for the existing responsive layout,
-        // but replace its visual with the MIKA brain mark as the single connect control.
+        // The radar itself is the sole connect/disconnect control.
         val connectMark = FrameLayout(this@MainActivity).apply {
             clipChildren = false
             clipToPadding = false
+            orbitDial.visibility = View.VISIBLE
+            orbitDial.setOnClickListener { toggleTunnel() }
             addView(orbitDial, FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 Gravity.CENTER,
-            ).apply { })
-            orbitDial.visibility = View.INVISIBLE
-            val brainButton = ImageView(this@MainActivity).apply {
-                setImageResource(R.drawable.mika_ai_vpn_icon)
-                scaleType = ImageView.ScaleType.FIT_CENTER
-                contentDescription = Strings.t("CONNECT")
-                isClickable = true
-                isFocusable = true
-                setPadding(dp(8), dp(8), dp(8), dp(8))
-                setOnClickListener { toggleTunnel() }
-                background = Sculpt.sculptedBackground(
-                    resources.displayMetrics.density,
-                    Sculpt.withAlpha(palette.neonBlue, 0.16f),
-                    999,
-                )
-            }
-            addView(brainButton, FrameLayout.LayoutParams(dp(116), dp(116), Gravity.CENTER))
+            ))
         }
         addView(connectMark, LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.WRAP_CONTENT,
