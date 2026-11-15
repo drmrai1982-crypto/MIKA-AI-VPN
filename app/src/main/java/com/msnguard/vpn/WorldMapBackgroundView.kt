@@ -11,6 +11,8 @@ import android.view.animation.LinearInterpolator
 import org.json.JSONArray
 import org.json.JSONObject
 import kotlin.math.sin
+import kotlin.math.ln
+import kotlin.math.tan
 
 /**
  * Animated world-network backdrop for the MIKA AI VPN home screen.
@@ -58,7 +60,9 @@ class WorldMapBackgroundView(context: Context) : View(context) {
                         val lon = coordinate.getDouble(0)
                         val lat = coordinate.getDouble(1).coerceIn(-85.0, 85.0)
                         val x = ((lon + 180.0) / 360.0).toFloat()
-                        val y = ((90.0 - lat) / 180.0).toFloat()
+                        val mercatorLat = Math.toRadians(lat)
+                        val y = (0.5 - ln(tan(Math.PI / 4.0 + mercatorLat / 2.0)) / (2.0 * Math.PI))
+                            .toFloat().coerceIn(0f, 1f)
                         if (p == 0 || (previousLon != null && kotlin.math.abs(lon - previousLon!!) > 180.0)) {
                             polygon.moveTo(x, y)
                         } else {
@@ -89,7 +93,7 @@ class WorldMapBackgroundView(context: Context) : View(context) {
     private fun drawRealWorldMap(canvas: Canvas, w: Float, mapTop: Float, mapHeight: Float) {
         val paths = loadCountryPaths()
         paint.style = Paint.Style.FILL
-        paint.color = Color.argb(24, 0, 229, 255)
+        paint.color = Color.argb(12, 230, 215, 122)
         paint.strokeWidth = 0.8f * density
         paths.forEach { source ->
             val matrix = android.graphics.Matrix().apply {
@@ -103,7 +107,7 @@ class WorldMapBackgroundView(context: Context) : View(context) {
             projected.transform(matrix)
             canvas.drawPath(projected, paint)
             paint.style = Paint.Style.STROKE
-            paint.color = Color.argb(135, 0, 220, 245)
+            paint.color = Color.argb(178, 230, 215, 122)
             canvas.drawPath(projected, paint)
             paint.style = Paint.Style.FILL
             paint.color = Color.argb(24, 0, 229, 255)
@@ -153,7 +157,7 @@ class WorldMapBackgroundView(context: Context) : View(context) {
 
         paint.style = Paint.Style.STROKE
         paint.strokeWidth = 0.55f * density
-        paint.color = Color.argb(22, 0, 229, 255)
+        paint.color = Color.argb(8, 230, 215, 122)
         for (i in 1..5) {
             val y = mapTop + mapHeight * i / 6f
             canvas.drawLine(w * .035f, y, w * .965f, y, paint)
@@ -166,12 +170,12 @@ class WorldMapBackgroundView(context: Context) : View(context) {
         // Accurate country polygons and coastlines from Natural Earth geometry.
         drawRealWorldMap(canvas, w, mapTop, mapHeight)
 
-        // Twelve links per node: dense local, regional and intercontinental connections.
+        // A restrained set of long-distance links keeps the map readable.
         paint.style = Paint.Style.STROKE
         paint.strokeCap = Paint.Cap.ROUND
-        paint.strokeWidth = 0.85f * density
+        paint.strokeWidth = 0.65f * density
         for (i in nodes.indices) {
-            val offsets = intArrayOf(1, 2, 3, 4, 5, 7, 9, 11, 14, 17, 21, 25)
+            val offsets = intArrayOf(4, 9, 17)
             offsets.forEachIndexed { linkIndex, offset ->
                 val a = nodes[i]
                 val b = nodes[(i + offset) % nodes.size]
@@ -180,23 +184,22 @@ class WorldMapBackgroundView(context: Context) : View(context) {
                 val bx = b[0] * w
                 val by = mapTop + b[1] * mapHeight
                 val cx = (ax + bx) / 2f
-                val arcLift = mapHeight * (0.055f + linkIndex * 0.025f)
+                val arcLift = mapHeight * (0.075f + linkIndex * 0.045f)
                 val cy = minOf(ay, by) - arcLift
                 val route = Path().apply { moveTo(ax, ay); quadTo(cx, cy, bx, by) }
                 paint.color = when (linkIndex) {
-                    0 -> Color.argb(105, 0, 210, 235)
-                    1 -> Color.argb(78, 0, 210, 235)
-                    else -> Color.argb(58, 0, 210, 235)
+                    0 -> Color.argb(32, 230, 215, 122)
+                    1 -> Color.argb(22, 230, 215, 122)
+                    else -> Color.argb(14, 230, 215, 122)
                 }
-                paint.strokeWidth = (if (linkIndex == 0) 1.15f else 0.9f) * density
+                paint.strokeWidth = 0.65f * density
                 canvas.drawPath(route, paint)
 
                 val activeRoute = (i == wave && linkIndex == 0) ||
-                    (i == (wave + nodes.size - 1) % nodes.size && linkIndex == 2) ||
-                    (i == (wave + 7) % nodes.size && linkIndex == 4)
+                    (i == (wave + 7) % nodes.size && linkIndex == 1)
                 if (activeRoute) {
                     paint.color = accent
-                    paint.strokeWidth = 1.8f * density
+                    paint.strokeWidth = 1.25f * density
                     canvas.drawPath(route, paint)
                 }
             }
@@ -207,10 +210,10 @@ class WorldMapBackgroundView(context: Context) : View(context) {
             val y = mapTop + point[1] * mapHeight
             val active = i == wave || i == (wave + 1) % nodes.size
             paint.style = Paint.Style.FILL
-            paint.color = if (active) accent else Color.rgb(0, 220, 245)
+            paint.color = if (active) accent else Color.rgb(176, 164, 105)
             paint.alpha = if (active) {
                 (170 + 85 * sin(phase * 6.28318f)).toInt().coerceIn(70, 255)
-            } else 155
+            } else 105
             if (active) {
                 canvas.drawCircle(x, y, 5.0f * density, paint.apply { alpha = 38 })
                 paint.alpha = 255
