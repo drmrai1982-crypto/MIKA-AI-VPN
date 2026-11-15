@@ -24,13 +24,16 @@ class WorldMapBackgroundView(context: Context) : View(context) {
     private var animator: ValueAnimator? = null
     private val density = resources.displayMetrics.density
 
+    // More detailed, hand-traced flat-map silhouettes in normalized coordinates.
+    // Coordinates are intentionally kept as vector paths so routes remain animated.
     private val continents = listOf(
-        floatArrayOf(0.05f,0.25f, 0.10f,0.16f, 0.19f,0.13f, 0.27f,0.18f, 0.32f,0.27f, 0.28f,0.36f, 0.23f,0.39f, 0.20f,0.51f, 0.16f,0.48f, 0.13f,0.38f, 0.08f,0.36f),
-        floatArrayOf(0.25f,0.48f, 0.31f,0.49f, 0.34f,0.58f, 0.32f,0.72f, 0.29f,0.87f, 0.26f,0.79f, 0.24f,0.65f),
-        floatArrayOf(0.42f,0.22f, 0.47f,0.14f, 0.55f,0.15f, 0.59f,0.22f, 0.56f,0.31f, 0.51f,0.34f, 0.49f,0.44f, 0.45f,0.39f),
-        floatArrayOf(0.48f,0.40f, 0.55f,0.38f, 0.60f,0.45f, 0.59f,0.60f, 0.55f,0.76f, 0.51f,0.72f, 0.48f,0.58f, 0.45f,0.48f),
-        floatArrayOf(0.57f,0.20f, 0.65f,0.14f, 0.76f,0.17f, 0.86f,0.20f, 0.94f,0.28f, 0.90f,0.38f, 0.81f,0.36f, 0.75f,0.44f, 0.68f,0.39f, 0.63f,0.32f),
-        floatArrayOf(0.77f,0.56f, 0.85f,0.54f, 0.91f,0.62f, 0.89f,0.75f, 0.83f,0.79f, 0.78f,0.70f)
+        floatArrayOf(.035f,.22f, .055f,.16f, .085f,.13f, .115f,.12f, .145f,.15f, .175f,.14f, .205f,.17f, .235f,.16f, .265f,.20f, .295f,.24f, .315f,.29f, .300f,.34f, .275f,.36f, .255f,.41f, .235f,.43f, .215f,.48f, .195f,.46f, .180f,.41f, .155f,.39f, .140f,.34f, .115f,.33f, .095f,.29f, .070f,.29f, .050f,.26f),
+        floatArrayOf(.245f,.47f, .270f,.47f, .295f,.50f, .315f,.55f, .320f,.61f, .310f,.68f, .300f,.75f, .285f,.82f, .270f,.88f, .255f,.84f, .245f,.77f, .235f,.69f, .225f,.61f, .230f,.54f),
+        floatArrayOf(.405f,.23f, .420f,.19f, .445f,.16f, .470f,.15f, .495f,.17f, .515f,.20f, .535f,.22f, .550f,.26f, .535f,.30f, .510f,.32f, .490f,.36f, .475f,.40f, .455f,.38f, .440f,.34f, .420f,.31f, .410f,.27f),
+        floatArrayOf(.455f,.40f, .480f,.38f, .505f,.39f, .530f,.42f, .550f,.46f, .555f,.52f, .545f,.59f, .530f,.66f, .515f,.73f, .495f,.79f, .480f,.75f, .470f,.68f, .455f,.61f, .445f,.54f, .440f,.47f),
+        floatArrayOf(.535f,.22f, .555f,.18f, .585f,.16f, .615f,.14f, .650f,.15f, .680f,.17f, .715f,.16f, .750f,.18f, .785f,.20f, .820f,.22f, .855f,.25f, .885f,.29f, .910f,.32f, .895f,.36f, .865f,.38f, .835f,.37f, .810f,.40f, .785f,.43f, .755f,.42f, .730f,.39f, .700f,.41f, .675f,.38f, .650f,.36f, .625f,.33f, .600f,.31f, .575f,.29f, .555f,.26f),
+        floatArrayOf(.765f,.55f, .790f,.53f, .820f,.54f, .845f,.56f, .870f,.60f, .885f,.65f, .875f,.70f, .855f,.75f, .830f,.78f, .805f,.76f, .785f,.72f, .770f,.67f),
+        floatArrayOf(.105f,.055f, .145f,.035f, .185f,.045f, .205f,.075f, .185f,.105f, .145f,.115f, .115f,.095f)
     )
 
     // More regional and intercontinental endpoints create a denser global mesh.
@@ -119,12 +122,12 @@ class WorldMapBackgroundView(context: Context) : View(context) {
             canvas.drawPath(land, paint)
         }
 
-        // Three links per node: local, regional and long-distance connections.
+        // Six links per node: dense local, regional and intercontinental connections.
         paint.style = Paint.Style.STROKE
         paint.strokeCap = Paint.Cap.ROUND
         paint.strokeWidth = 0.85f * density
         for (i in nodes.indices) {
-            val offsets = intArrayOf(1, 5, 11)
+            val offsets = intArrayOf(1, 2, 4, 7, 11, 16)
             offsets.forEachIndexed { linkIndex, offset ->
                 val a = nodes[i]
                 val b = nodes[(i + offset) % nodes.size]
@@ -144,8 +147,9 @@ class WorldMapBackgroundView(context: Context) : View(context) {
                 paint.strokeWidth = (if (linkIndex == 0) 0.95f else 0.7f) * density
                 canvas.drawPath(route, paint)
 
-                val activeRoute = i == wave && linkIndex == 0 ||
-                    i == (wave + nodes.size - 1) % nodes.size && linkIndex == 1
+                val activeRoute = (i == wave && linkIndex == 0) ||
+                    (i == (wave + nodes.size - 1) % nodes.size && linkIndex == 2) ||
+                    (i == (wave + 7) % nodes.size && linkIndex == 4)
                 if (activeRoute) {
                     paint.color = accent
                     paint.strokeWidth = 1.45f * density
