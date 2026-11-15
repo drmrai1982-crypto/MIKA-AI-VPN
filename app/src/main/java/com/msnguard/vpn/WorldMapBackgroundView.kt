@@ -8,6 +8,8 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.view.View
 import android.view.animation.LinearInterpolator
+import org.json.JSONArray
+import org.json.JSONObject
 import kotlin.math.sin
 
 /**
@@ -18,24 +20,13 @@ import kotlin.math.sin
  */
 class WorldMapBackgroundView(context: Context) : View(context) {
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-    private val land = Path()
+    private var countryPaths: List<Path>? = null
     private var phase = 0f
     private var accent = Color.rgb(255, 23, 68)
     private var animator: ValueAnimator? = null
     private val density = resources.displayMetrics.density
 
-    // More detailed, hand-traced flat-map silhouettes in normalized coordinates.
-    // Coordinates are intentionally kept as vector paths so routes remain animated.
-    private val continents = listOf(
-        floatArrayOf(.035f,.22f, .055f,.16f, .085f,.13f, .115f,.12f, .145f,.15f, .175f,.14f, .205f,.17f, .235f,.16f, .265f,.20f, .295f,.24f, .315f,.29f, .300f,.34f, .275f,.36f, .255f,.41f, .235f,.43f, .215f,.48f, .195f,.46f, .180f,.41f, .155f,.39f, .140f,.34f, .115f,.33f, .095f,.29f, .070f,.29f, .050f,.26f),
-        floatArrayOf(.245f,.47f, .270f,.47f, .295f,.50f, .315f,.55f, .320f,.61f, .310f,.68f, .300f,.75f, .285f,.82f, .270f,.88f, .255f,.84f, .245f,.77f, .235f,.69f, .225f,.61f, .230f,.54f),
-        floatArrayOf(.405f,.23f, .420f,.19f, .445f,.16f, .470f,.15f, .495f,.17f, .515f,.20f, .535f,.22f, .550f,.26f, .535f,.30f, .510f,.32f, .490f,.36f, .475f,.40f, .455f,.38f, .440f,.34f, .420f,.31f, .410f,.27f),
-        floatArrayOf(.455f,.40f, .480f,.38f, .505f,.39f, .530f,.42f, .550f,.46f, .555f,.52f, .545f,.59f, .530f,.66f, .515f,.73f, .495f,.79f, .480f,.75f, .470f,.68f, .455f,.61f, .445f,.54f, .440f,.47f),
-        floatArrayOf(.535f,.22f, .555f,.18f, .585f,.16f, .615f,.14f, .650f,.15f, .680f,.17f, .715f,.16f, .750f,.18f, .785f,.20f, .820f,.22f, .855f,.25f, .885f,.29f, .910f,.32f, .895f,.36f, .865f,.38f, .835f,.37f, .810f,.40f, .785f,.43f, .755f,.42f, .730f,.39f, .700f,.41f, .675f,.38f, .650f,.36f, .625f,.33f, .600f,.31f, .575f,.29f, .555f,.26f),
-        floatArrayOf(.765f,.55f, .790f,.53f, .820f,.54f, .845f,.56f, .870f,.60f, .885f,.65f, .875f,.70f, .855f,.75f, .830f,.78f, .805f,.76f, .785f,.72f, .770f,.67f),
-        floatArrayOf(.105f,.055f, .145f,.035f, .185f,.045f, .205f,.075f, .185f,.105f, .145f,.115f, .115f,.095f)
-    )
-
+    // Country outlines are loaded from the bundled Natural Earth 1:110m dataset.
     // More regional and intercontinental endpoints create a denser global mesh.
     private val nodes = arrayOf(
         floatArrayOf(.09f,.29f), floatArrayOf(.14f,.23f), floatArrayOf(.20f,.30f),
@@ -49,6 +40,75 @@ class WorldMapBackgroundView(context: Context) : View(context) {
         floatArrayOf(.86f,.70f), floatArrayOf(.67f,.55f), floatArrayOf(.40f,.55f),
         floatArrayOf(.12f,.48f), floatArrayOf(.94f,.49f), floatArrayOf(.74f,.52f)
     )
+
+    private fun loadCountryPaths(): List<Path> {
+        countryPaths?.let { return it }
+        val parsed = runCatching {
+            val json = assets.open("ne_110m_admin_0_countries.geojson")
+                .bufferedReader().use { it.readText() }
+            val features = JSONObject(json).getJSONArray("features")
+            val result = ArrayList<Path>(features.length())
+            fun addPolygon(rings: JSONArray) {
+                val polygon = Path().apply { fillType = Path.FillType.EVEN_ODD }
+                for (r in 0 until rings.length()) {
+                    val points = rings.getJSONArray(r)
+                    var previousLon: Double? = null
+                    for (p in 0 until points.length()) {
+                        val coordinate = points.getJSONArray(p)
+                        val lon = coordinate.getDouble(0)
+                        val lat = coordinate.getDouble(1).coerceIn(-85.0, 85.0)
+                        val x = ((lon + 180.0) / 360.0).toFloat()
+                        val y = ((90.0 - lat) / 180.0).toFloat()
+                        if (p == 0 || (previousLon != null && kotlin.math.abs(lon - previousLon!!) > 180.0)) {
+                            polygon.moveTo(x, y)
+                        } else {
+                            polygon.lineTo(x, y)
+                        }
+                        previousLon = lon
+                    }
+                    polygon.close()
+                }
+                result.add(polygon)
+            }
+            for (i in 0 until features.length()) {
+                val geometry = features.getJSONObject(i).optJSONObject("geometry") ?: continue
+                val coordinates = geometry.optJSONArray("coordinates") ?: continue
+                when (geometry.optString("type")) {
+                    "Polygon" -> addPolygon(coordinates)
+                    "MultiPolygon" -> for (p in 0 until coordinates.length()) {
+                        addPolygon(coordinates.getJSONArray(p))
+                    }
+                }
+            }
+            result
+        }.getOrElse { emptyList() }
+        countryPaths = parsed
+        return parsed
+    }
+
+    private fun drawRealWorldMap(canvas: Canvas, w: Float, mapTop: Float, mapHeight: Float) {
+        val paths = loadCountryPaths()
+        paint.style = Paint.Style.FILL
+        paint.color = Color.argb(24, 0, 229, 255)
+        paint.strokeWidth = 0.8f * density
+        paths.forEach { source ->
+            val matrix = android.graphics.Matrix().apply {
+                setValues(floatArrayOf(
+                    w, 0f, 0f,
+                    0f, mapHeight, mapTop,
+                    0f, 0f, 1f
+                ))
+            }
+            val projected = Path(source)
+            projected.transform(matrix)
+            canvas.drawPath(projected, paint)
+            paint.style = Paint.Style.STROKE
+            paint.color = Color.argb(135, 0, 220, 245)
+            canvas.drawPath(projected, paint)
+            paint.style = Paint.Style.FILL
+            paint.color = Color.argb(24, 0, 229, 255)
+        }
+    }
 
     fun setConnectionState(state: OrbitDialView.State) {
         accent = when (state) {
@@ -103,31 +163,15 @@ class WorldMapBackgroundView(context: Context) : View(context) {
             canvas.drawLine(x, mapTop, x, mapBottom, paint)
         }
 
-        // Existing land silhouettes are retained pending the approved globe reference.
-        continents.forEach { points ->
-            land.reset()
-            land.moveTo(points[0] * w, mapTop + points[1] * mapHeight)
-            var i = 2
-            while (i < points.size) {
-                land.lineTo(points[i] * w, mapTop + points[i + 1] * mapHeight)
-                i += 2
-            }
-            land.close()
-            paint.style = Paint.Style.FILL
-            paint.color = Color.argb(18, 0, 229, 255)
-            canvas.drawPath(land, paint)
-            paint.style = Paint.Style.STROKE
-            paint.strokeWidth = 0.9f * density
-            paint.color = Color.argb(105, 0, 220, 245)
-            canvas.drawPath(land, paint)
-        }
+        // Accurate country polygons and coastlines from Natural Earth geometry.
+        drawRealWorldMap(canvas, w, mapTop, mapHeight)
 
         // Six links per node: dense local, regional and intercontinental connections.
         paint.style = Paint.Style.STROKE
         paint.strokeCap = Paint.Cap.ROUND
         paint.strokeWidth = 0.85f * density
         for (i in nodes.indices) {
-            val offsets = intArrayOf(1, 2, 4, 7, 11, 16)
+            val offsets = intArrayOf(1, 2, 3, 5, 7, 10, 14, 19)
             offsets.forEachIndexed { linkIndex, offset ->
                 val a = nodes[i]
                 val b = nodes[(i + offset) % nodes.size]
