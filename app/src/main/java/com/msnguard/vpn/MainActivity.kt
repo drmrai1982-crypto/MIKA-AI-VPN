@@ -1615,18 +1615,38 @@ class MainActivity : Activity() {
         clipChildren = false
         clipToPadding = false
 
-        addView(orbitDial, LinearLayout.LayoutParams(
+        // Keep the original dial measured for the existing responsive layout,
+        // but replace its visual with the MIKA brain mark as the single connect control.
+        val connectMark = FrameLayout(this@MainActivity).apply {
+            clipChildren = false
+            clipToPadding = false
+            addView(orbitDial, FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                Gravity.CENTER,
+            ).apply { })
+            orbitDial.visibility = View.INVISIBLE
+            val brainButton = ImageView(this@MainActivity).apply {
+                setImageResource(R.drawable.mika_ai_vpn_icon)
+                scaleType = ImageView.ScaleType.FIT_CENTER
+                contentDescription = Strings.t("CONNECT")
+                isClickable = true
+                isFocusable = true
+                setPadding(dp(8), dp(8), dp(8), dp(8))
+                setOnClickListener { toggleTunnel() }
+                background = Sculpt.sculptedBackground(
+                    resources.displayMetrics.density,
+                    Sculpt.withAlpha(palette.neonBlue, 0.16f),
+                    999,
+                )
+            }
+            addView(brainButton, FrameLayout.LayoutParams(dp(116), dp(116), Gravity.CENTER))
+        }
+        addView(connectMark, LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.WRAP_CONTENT,
             ViewGroup.LayoutParams.WRAP_CONTENT,
         ).apply {
             topMargin = dp(14)
-            // Cancel the console's 20dp side padding for this one child.
-            //
-            // The dial measures (RING + BLEED) * 2 so its glow has canvas to land
-            // on. The console's own padding would clamp that box and force the
-            // ring below its intended size; negative margins give the dial the
-            // full width back, so the ring keeps its size and the bleed still
-            // fits. clipToPadding=false (set above) is what lets it draw there.
             leftMargin = -dp(20)
             rightMargin = -dp(20)
         })
