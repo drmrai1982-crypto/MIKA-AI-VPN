@@ -793,7 +793,7 @@ class OrbitDialView(
          * 112dp is the largest ring that lets the full column fit without
          * scrolling while keeping the dial the dominant element on the screen.
          */
-        const val RING_DP = 112
+        const val RING_DP = 78
         /** How far past the ring the halo's outer edge sits, at rest. */
         const val HALO_OUTSET_DP = 24
         /** Extra reach the halo gains at the top of its breath. */
