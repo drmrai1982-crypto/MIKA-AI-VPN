@@ -264,11 +264,11 @@ class OrbitDialView(
             cx, cy,
             intArrayOf(
                 Color.argb(0, Color.red(accent), Color.green(accent), Color.blue(accent)),
-                Sculpt.withAlpha(accent, 0.008f),
-                Sculpt.withAlpha(accent, 0.035f),
-                Sculpt.withAlpha(accent, 0.13f),
-                Sculpt.withAlpha(accent, 0.38f),
-                Sculpt.withAlpha(accent, 0.035f),
+                Sculpt.withAlpha(accent, 0.018f),
+                Sculpt.withAlpha(accent, 0.075f),
+                Sculpt.withAlpha(accent, 0.24f),
+                Sculpt.withAlpha(accent, 0.62f),
+                Sculpt.withAlpha(accent, 0.075f),
             ),
             floatArrayOf(0f, 0.62f, 0.78f, 0.90f, 0.94f, 1f),
         )
@@ -284,14 +284,17 @@ class OrbitDialView(
         // Three translucent strokes create a reliable neon bloom on devices
         // where hardware shadow rendering is weak or inconsistent.
         paint.strokeCap = Paint.Cap.ROUND
-        paint.strokeWidth = 8.0f * density
-        paint.color = Sculpt.withAlpha(accent, 0.075f)
+        paint.strokeWidth = 18.0f * density
+        paint.color = Sculpt.withAlpha(accent, 0.10f)
         canvas.drawLine(cx, cy, bx, by, paint)
-        paint.strokeWidth = 4.6f * density
-        paint.color = Sculpt.withAlpha(accent, 0.16f)
+        paint.strokeWidth = 11.0f * density
+        paint.color = Sculpt.withAlpha(accent, 0.20f)
         canvas.drawLine(cx, cy, bx, by, paint)
-        paint.strokeWidth = 2.6f * density
+        paint.strokeWidth = 6.0f * density
         paint.color = Sculpt.withAlpha(accent, 0.34f)
+        canvas.drawLine(cx, cy, bx, by, paint)
+        paint.strokeWidth = 3.0f * density
+        paint.color = Sculpt.withAlpha(accent, 0.58f)
         canvas.drawLine(cx, cy, bx, by, paint)
         paint.strokeWidth = 1.35f * density
         paint.color = Sculpt.withAlpha(accent, 1f)
