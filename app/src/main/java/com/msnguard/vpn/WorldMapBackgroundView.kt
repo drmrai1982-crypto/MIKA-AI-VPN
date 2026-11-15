@@ -166,12 +166,12 @@ class WorldMapBackgroundView(context: Context) : View(context) {
         // Accurate country polygons and coastlines from Natural Earth geometry.
         drawRealWorldMap(canvas, w, mapTop, mapHeight)
 
-        // Six links per node: dense local, regional and intercontinental connections.
+        // Twelve links per node: dense local, regional and intercontinental connections.
         paint.style = Paint.Style.STROKE
         paint.strokeCap = Paint.Cap.ROUND
         paint.strokeWidth = 0.85f * density
         for (i in nodes.indices) {
-            val offsets = intArrayOf(1, 2, 3, 5, 7, 10, 14, 19)
+            val offsets = intArrayOf(1, 2, 3, 4, 5, 7, 9, 11, 14, 17, 21, 25)
             offsets.forEachIndexed { linkIndex, offset ->
                 val a = nodes[i]
                 val b = nodes[(i + offset) % nodes.size]
