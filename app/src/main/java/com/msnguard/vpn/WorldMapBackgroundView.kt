@@ -44,7 +44,7 @@ class WorldMapBackgroundView(context: Context) : View(context) {
     private fun loadCountryPaths(): List<Path> {
         countryPaths?.let { return it }
         val parsed = runCatching {
-            val json = assets.open("ne_110m_admin_0_countries.geojson")
+            val json = resources.assets.open("ne_110m_admin_0_countries.geojson")
                 .bufferedReader().use { it.readText() }
             val features = JSONObject(json).getJSONArray("features")
             val result = ArrayList<Path>(features.length())
