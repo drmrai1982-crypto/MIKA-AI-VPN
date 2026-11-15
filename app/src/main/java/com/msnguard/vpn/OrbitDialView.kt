@@ -193,100 +193,160 @@ class OrbitDialView(
         drawRadar(canvas, cx, cy, ring, accentFor(state))
     }
 
-    /** Airport-style radar: rotating sweep, range rings, crosshair and moving blips. */
+    /** Realistic PPI-style radar with range rings, azimuth marks and phosphor sweep. */
     private fun drawRadar(canvas: Canvas, cx: Float, cy: Float, radius: Float, accent: Int) {
         val r = radius * 0.91f
+        val oval = RectF(cx - r, cy - r, cx + r, cy + r)
+        val angle = loopFraction * 360f - 90f
+
+        // Dark radar glass with a soft phosphor falloff toward the perimeter.
         paint.shader = null
         paint.style = Paint.Style.FILL
-        paint.color = Sculpt.withAlpha(palette.surface, 0.94f)
+        paint.color = Color.rgb(2, 12, 17)
         canvas.drawCircle(cx, cy, r, paint)
-
-        // Soft state-coloured radar field.
-        paint.shader = RadialGradient(cx, cy, r,
-            intArrayOf(Sculpt.withAlpha(accent, 0.15f), Sculpt.withAlpha(accent, 0.035f), Sculpt.withAlpha(palette.ink, 0.02f)),
-            floatArrayOf(0f, 0.72f, 1f), Shader.TileMode.CLAMP)
+        paint.shader = RadialGradient(
+            cx, cy, r,
+            intArrayOf(
+                Sculpt.withAlpha(accent, 0.105f),
+                Sculpt.withAlpha(accent, 0.045f),
+                Color.argb(0, 0, 0, 0),
+            ),
+            floatArrayOf(0f, 0.68f, 1f),
+            Shader.TileMode.CLAMP,
+        )
         canvas.drawCircle(cx, cy, r, paint)
         paint.shader = null
 
+        // Four range rings: the outer ring is the scan boundary.
         paint.style = Paint.Style.STROKE
-        paint.strokeWidth = 1f * density
-        paint.color = Sculpt.withAlpha(accent, 0.58f)
-        for (fraction in floatArrayOf(0.25f, 0.5f, 0.75f, 1f)) {
+        paint.strokeWidth = 0.85f * density
+        for (fraction in floatArrayOf(0.25f, 0.50f, 0.75f, 1f)) {
+            paint.color = Sculpt.withAlpha(accent, if (fraction == 1f) 0.58f else 0.30f)
             canvas.drawCircle(cx, cy, r * fraction, paint)
         }
-        paint.color = Sculpt.withAlpha(accent, 0.30f)
-        canvas.drawLine(cx-r, cy, cx+r, cy, paint)
-        canvas.drawLine(cx, cy-r, cx, cy+r, paint)
-        canvas.drawLine(cx-r*0.707f, cy-r*0.707f, cx+r*0.707f, cy+r*0.707f, paint)
-        canvas.drawLine(cx-r*0.707f, cy+r*0.707f, cx+r*0.707f, cy-r*0.707f, paint)
 
-        // Rotating luminous sweep sector, like an airport surveillance radar.
-        val angle = loopFraction * 360f - 90f
-        val sector = Path().apply {
-            moveTo(cx, cy)
-            lineTo(cx + cos(Math.toRadians(angle.toDouble())).toFloat()*r,
-                   cy + sin(Math.toRadians(angle.toDouble())).toFloat()*r)
-            arcTo(RectF(cx-r, cy-r, cx+r, cy+r), angle, 58f, false)
-            close()
+        // Fine azimuth spokes and cardinal direction markers.
+        for (degree in 0 until 360 step 30) {
+            val rad = Math.toRadians((degree - 90).toDouble())
+            val major = degree % 90 == 0
+            val inner = if (major) r * 0.10f else r * 0.035f
+            val outer = if (major) r else r * 0.965f
+            paint.strokeWidth = if (major) 0.9f * density else 0.55f * density
+            paint.color = Sculpt.withAlpha(accent, if (major) 0.30f else 0.15f)
+            canvas.drawLine(
+                cx + cos(rad).toFloat() * inner,
+                cy + sin(rad).toFloat() * inner,
+                cx + cos(rad).toFloat() * outer,
+                cy + sin(rad).toFloat() * outer,
+                paint,
+            )
         }
+
+        // Short perimeter graduations, like a real bearing scale.
+        for (degree in 0 until 360 step 5) {
+            val rad = Math.toRadians((degree - 90).toDouble())
+            val major = degree % 30 == 0
+            val inner = r - (if (major) 6f else 2.5f) * density
+            paint.strokeWidth = if (major) 1f * density else 0.65f * density
+            paint.color = Sculpt.withAlpha(accent, if (major) 0.62f else 0.26f)
+            canvas.drawLine(
+                cx + cos(rad).toFloat() * inner,
+                cy + sin(rad).toFloat() * inner,
+                cx + cos(rad).toFloat() * r,
+                cy + sin(rad).toFloat() * r,
+                paint,
+            )
+        }
+
+        // A narrow phosphor sector trails the rotating sweep.
         paint.style = Paint.Style.FILL
-        paint.shader = SweepGradient(cx, cy,
-            intArrayOf(Sculpt.withAlpha(accent, 0.00f), Sculpt.withAlpha(accent, 0.25f), Sculpt.withAlpha(accent, 0.00f)),
-            floatArrayOf(0f, 0.14f, 0.17f))
-        paint.shader?.setLocalMatrix(Matrix().apply { setRotate(angle, cx, cy) })
-        canvas.drawPath(sector, paint)
+        paint.shader = SweepGradient(
+            cx, cy,
+            intArrayOf(
+                Color.argb(0, Color.red(accent), Color.green(accent), Color.blue(accent)),
+                Sculpt.withAlpha(accent, 0.015f),
+                Sculpt.withAlpha(accent, 0.075f),
+                Sculpt.withAlpha(accent, 0.22f),
+                Sculpt.withAlpha(accent, 0.015f),
+            ),
+            floatArrayOf(0f, 0.76f, 0.90f, 0.975f, 1f),
+        )
+        paint.shader?.setLocalMatrix(Matrix().apply { setRotate(angle - 360f, cx, cy) })
+        canvas.drawCircle(cx, cy, r, paint)
         paint.shader = null
 
-        // Bright leading beam.
+        // Beam line and a soft glow at its leading edge.
+        val beamRad = Math.toRadians(angle.toDouble())
+        val bx = cx + cos(beamRad).toFloat() * r
+        val by = cy + sin(beamRad).toFloat() * r
         paint.style = Paint.Style.STROKE
-        paint.strokeWidth = 2.2f * density
-        paint.color = Sculpt.withAlpha(accent, 0.95f)
-        paint.setShadowLayer(7f*density, 0f, 0f, Sculpt.withAlpha(accent, 0.9f))
-        canvas.drawLine(cx, cy, cx + cos(Math.toRadians(angle.toDouble())).toFloat()*r,
-            cy + sin(Math.toRadians(angle.toDouble())).toFloat()*r, paint)
+        paint.strokeWidth = 1.6f * density
+        paint.color = Sculpt.withAlpha(accent, 0.96f)
+        paint.setShadowLayer(6f * density, 0f, 0f, Sculpt.withAlpha(accent, 0.8f))
+        canvas.drawLine(cx, cy, bx, by, paint)
         paint.clearShadowLayer()
 
-        // Fixed route traces and radar targets; targets pulse as the sweep passes.
-        val nodes = arrayOf(
-            floatArrayOf(-0.48f, -0.30f), floatArrayOf(0.18f, -0.58f),
-            floatArrayOf(0.56f, -0.12f), floatArrayOf(0.34f, 0.46f),
-            floatArrayOf(-0.30f, 0.48f), floatArrayOf(-0.62f, 0.12f),
+        // Fixed radar returns. Each target brightens as the sweep passes it,
+        // then decays naturally instead of blinking in a repeating sequence.
+        val targets = arrayOf(
+            floatArrayOf(-0.48f, -0.31f, 0.9f),
+            floatArrayOf(0.19f, -0.57f, 0.72f),
+            floatArrayOf(0.57f, -0.10f, 1.0f),
+            floatArrayOf(0.35f, 0.43f, 0.82f),
+            floatArrayOf(-0.28f, 0.49f, 0.68f),
+            floatArrayOf(-0.63f, 0.12f, 0.88f),
+            floatArrayOf(0.04f, 0.28f, 0.58f),
         )
-        paint.style = Paint.Style.STROKE
-        paint.strokeWidth = 1.25f * density
-        paint.color = Sculpt.withAlpha(accent, 0.48f)
-        val route = Path()
-        nodes.forEachIndexed { index, p ->
-            val x = cx + p[0] * r
-            val y = cy + p[1] * r
-            if (index == 0) route.moveTo(x, y) else route.lineTo(x, y)
-        }
-        canvas.drawPath(route, paint)
-        nodes.forEachIndexed { index, p ->
-            val x = cx + p[0] * r
-            val y = cy + p[1] * r
-            val phase = (loopFraction + index * 0.17f) % 1f
-            val glow = 0.55f + 0.45f * (1f - kotlin.math.abs(phase - 0.5f) * 2f)
+        targets.forEach { target ->
+            val nx = target[0]
+            val ny = target[1]
+            val distance = kotlin.math.sqrt(nx * nx + ny * ny)
+            if (distance > 0.92f) return@forEach
+            val bearing = Math.toDegrees(kotlin.math.atan2(ny.toDouble(), nx.toDouble())).toFloat()
+            val targetAngle = (bearing + 360f) % 360f
+            val sweepAngle = (angle + 360f) % 360f
+            val behind = (sweepAngle - targetAngle + 360f) % 360f
+            val returnStrength = when {
+                behind < 7f -> 1f - behind / 10f
+                behind < 48f -> 0.78f * (1f - (behind - 7f) / 48f)
+                else -> 0.12f
+            } * target[2]
+
+            val x = cx + nx * r
+            val y = cy + ny * r
             paint.style = Paint.Style.FILL
-            paint.color = Sculpt.withAlpha(accent, 0.22f)
-            canvas.drawCircle(x, y, (4f + glow*2f)*density, paint)
-            paint.color = Sculpt.withAlpha(accent, 0.92f)
-            canvas.drawCircle(x, y, (1.8f + glow)*density, paint)
+            paint.color = Sculpt.withAlpha(accent, 0.10f + returnStrength * 0.22f)
+            canvas.drawCircle(x, y, (4.5f + returnStrength * 2.5f) * density, paint)
+            paint.color = Sculpt.withAlpha(accent, 0.30f + returnStrength * 0.68f)
+            canvas.drawCircle(x, y, (1.1f + returnStrength * 1.0f) * density, paint)
+            if (returnStrength > 0.55f) {
+                paint.strokeWidth = 0.8f * density
+                paint.color = Sculpt.withAlpha(accent, returnStrength * 0.42f)
+                canvas.drawLine(x, y, x - nx * 5f * density, y - ny * 5f * density, paint)
+            }
         }
 
-        // Centre is intentionally empty: no brain, logo, shield or power glyph.
+        // Centre reference and a subtle centre marker.
         paint.style = Paint.Style.STROKE
-        paint.strokeWidth = 1.4f * density
-        paint.color = Sculpt.withAlpha(accent, 0.82f)
-        canvas.drawCircle(cx, cy, 3.2f*density, paint)
+        paint.strokeWidth = 1f * density
+        paint.color = Sculpt.withAlpha(accent, 0.65f)
+        canvas.drawCircle(cx, cy, 3.4f * density, paint)
         paint.style = Paint.Style.FILL
-        paint.color = accent
-        canvas.drawCircle(cx, cy, 1.5f*density, paint)
+        paint.color = Sculpt.withAlpha(accent, 0.95f)
+        canvas.drawCircle(cx, cy, 1.35f * density, paint)
 
-        // Status caption remains readable inside the radar's lower edge.
+        // Small directional labels, kept understated so the radar remains legible.
         textPaint.textAlign = Paint.Align.CENTER
         textPaint.typeface = monoTypeface
-        textPaint.textSize = 8.5f * density
+        textPaint.textSize = 7f * density
+        textPaint.color = Sculpt.withAlpha(accent, 0.72f)
+        canvas.drawText("N", cx, cy - r + 13f * density, textPaint)
+        canvas.drawText("E", cx + r - 11f * density, cy + 2.5f * density, textPaint)
+        canvas.drawText("S", cx, cy + r - 5f * density, textPaint)
+        canvas.drawText("W", cx - r + 11f * density, cy + 2.5f * density, textPaint)
+
+        // Status caption stays readable against the radar field.
+        textPaint.textSize = 8f * density
         textPaint.color = if (state == State.FAILED) palette.dangerText else accent
         val caption = when (state) {
             State.DISCONNECTED -> "OFFLINE"
@@ -295,10 +355,11 @@ class OrbitDialView(
             State.DEGRADED -> "WEAK SIGNAL"
             State.FAILED -> "CONNECTION ERROR"
         }
-        canvas.drawText(caption, cx, cy + r*0.66f, textPaint)
+        canvas.drawText(caption, cx, cy + r * 0.67f, textPaint)
+
         paint.style = Paint.Style.STROKE
-        paint.strokeWidth = 1.2f*density
-        paint.color = Sculpt.withAlpha(accent, 0.9f)
+        paint.strokeWidth = 1.15f * density
+        paint.color = Sculpt.withAlpha(accent, 0.78f)
         canvas.drawCircle(cx, cy, r, paint)
     }
 
