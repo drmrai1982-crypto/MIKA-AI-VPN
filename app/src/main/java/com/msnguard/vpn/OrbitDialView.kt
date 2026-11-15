@@ -895,7 +895,7 @@ class OrbitDialView(
     private fun startLoop() {
         if (loopAnimator != null) return
         loopAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
-            duration = if (state == State.CONNECTING) 1_150 else 3_200
+            duration = if (state == State.CONNECTING) 3_600 else 7_500
             repeatCount = ValueAnimator.INFINITE
             interpolator = null
             addUpdateListener {
